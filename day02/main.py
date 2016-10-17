@@ -6,6 +6,7 @@
 import json, sys, os, datetime
 APP_ABS_PATH = os.path.dirname(os.path.abspath(__file__))
 CURRENT_USER = dict()
+CURRENT_BUY_LOG = []
 # 华丽的分割线
 sep_row = '=' * 50
 
@@ -80,7 +81,7 @@ def shopping_menu(user: dict, ds):
         # 如果用户输入的不是数字
         elif user_choice in ['q', 'b', 'c', 'r']:
             if user_choice == 'q':
-                exit()
+                user_leave()
             elif user_choice == 'b':
                 return
             elif user_choice == 'c':
@@ -96,10 +97,10 @@ def shopping_menu(user: dict, ds):
 def user_recharge_money():
     user = CURRENT_USER
     print(sep_row)
-    if user:
-        print('当前余额：%d' % user['wallet'])
-    else:
+    if user['new_guy']:
         user['wallet'] = 0
+    else:
+        print('当前余额：%d' % user['wallet'])
     while True:
         recharge = input('请输入你要充值的金额：').strip()
         if recharge.isdigit():
@@ -125,12 +126,56 @@ def user_pay(total_amount: int):
         # 记录的内容为购买日期时间、商品名称、数量、单项商品总金额
         log_msg = "%s %s %d %d %d" % (dt, p_name, p[0], p[1], p[0]*p[1])
         CURRENT_USER['log'].append(log_msg)
+        CURRENT_BUY_LOG.append(log_msg)
     # 清空购物车
     CURRENT_USER['cart'] = dict()
     # 保存用户状态
     save_user_info(CURRENT_USER)
     print('谢谢，您总共消费%d元，点击任意键返回' % total_amount)
     input()
+
+
+# 用户想离开，打印当次购买记录
+def user_leave():
+    global CURRENT_BUY_LOG
+    if CURRENT_BUY_LOG:
+        print('多谢惠顾，您本次的购物清单如下')
+        print('您的购买记录如下：\n\n%-15s %-2s %-2s %-2s %-2s' % ('购买时间', '商品', '单价', '件数', '金额'))
+        for log_msg in CURRENT_BUY_LOG:
+            print(log_msg)
+        CURRENT_BUY_LOG = []
+    exit()
+
+
+# 用户验证函数
+def user_auth():
+    global CURRENT_USER
+    print(sep_row)
+    while True:
+        username_input = input('用户名：').strip()
+        # 从文件读取用户信息
+        CURRENT_USER = load_user_info(username_input)
+        # 如果是老客户，打印欢迎消息和余额
+        if CURRENT_USER:
+            password_input = input('密码：')
+            if password_input == CURRENT_USER['password']:
+                print(r'欢迎回来 %s，您的余额是%d' % (CURRENT_USER['name'], CURRENT_USER['wallet']))
+                return True
+            else:
+                print('您输入密码有误，请重新输入')
+        # 如果是新客户，则初始化其数据，并让用户充值，最后保存到用户对应的文件
+        else:
+            print('你是新顾客')
+            init_password = input('请输入一个密码作登录用途（如留空，则默认使用123）:')
+            CURRENT_USER = dict()
+            CURRENT_USER['name'] = username_input
+            CURRENT_USER['password'] = init_password if init_password else '123'
+            CURRENT_USER['log'] = []
+            CURRENT_USER['cart'] = dict()
+            CURRENT_USER['new_guy'] = True
+            user_recharge_money()
+            save_user_info(CURRENT_USER)
+            return True
 
 
 # 展示购物车函数
@@ -223,24 +268,8 @@ def log_display():
 
 # 程序入口
 if __name__ == '__main__':
-    # 用户输入身份信息
-    username = input('请问您是? ').strip()
-
-    print(sep_row)
-    # 从文件读取用户信息
-    CURRENT_USER = load_user_info(username)
-    # 如果是老客户，打印欢迎消息和余额
-    if CURRENT_USER:
-        print(r'欢迎回来 %s，您的余额是%d' % (CURRENT_USER['name'], CURRENT_USER['wallet']))
-    # 如果是新客户，则初始化其数据，并让用户充值，最后保存到用户对应的文件
-    else:
-        print('你是新顾客')
-        CURRENT_USER = dict()
-        user_recharge_money()
-        CURRENT_USER['name'] = username
-        CURRENT_USER['log'] = []
-        CURRENT_USER['cart'] = dict()
-        save_user_info(CURRENT_USER)
+    # 验证用户
+    user_auth()
 
     # 循环开始
     # 打印入口
@@ -253,7 +282,7 @@ if __name__ == '__main__':
 (q)退出  请选择：''')
         # 用户输入q，则退出程序
         if entry_choice == 'q':
-            exit()
+            user_leave()
         # 用户输入1，则进行购物
         elif entry_choice == '1':
             # 加载菜单数据

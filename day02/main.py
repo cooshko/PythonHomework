@@ -3,7 +3,7 @@
 # @Author  : Coosh
 # @File    : main.py
 
-import json, sys, os, datetime
+import json,  os, datetime
 APP_ABS_PATH = os.path.dirname(os.path.abspath(__file__))
 CURRENT_USER = dict()
 CURRENT_BUY_LOG = []
@@ -99,6 +99,7 @@ def user_recharge_money():
     print(sep_row)
     if user['new_guy']:
         user['wallet'] = 0
+        user['new_guy'] = False
     else:
         print('当前余额：%d' % user['wallet'])
     while True:

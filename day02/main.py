@@ -70,7 +70,7 @@ def shopping_menu(user: dict, ds):
                         p_num = int(p_num)
                         p_name = selected_item[0]
                         p_price = int(selected_item[1])
-                        update_cart('add', p_name, p_price, p_num)
+                        cart_update('add', p_name, p_price, p_num)
                         print('已加入购物车：%s x %d' % (p_name, p_num))
                         break
             else:
@@ -82,16 +82,15 @@ def shopping_menu(user: dict, ds):
             elif user_choice == 'b':
                 return
             elif user_choice == 'c':
-                display_cart()
+                cart_display()
         else:
             print('你的输入有误，请重新选择')
 
 
 # 充值函数
-def user_recharge_money(user: dict):
+def user_recharge_money():
+    user = CURRENT_USER
     print(sep_row)
-    if not isinstance(user, dict):
-        raise TypeError('user should be dict.')
     if user:
         print('当前余额：%d' % user['wallet'])
     else:
@@ -110,24 +109,57 @@ def user_recharge_money(user: dict):
             print('输入格式有误，请重新输入')
 
 
+# 用户支付
+def user_pay(total_amount: int):
+    pass
+
+
 # 展示购物车函数
-def display_cart():
-    print(sep_row)
-    if CURRENT_USER['cart']:
-        total_amount = 0
-        for p_id, p_name in enumerate(sorted(CURRENT_USER['cart'].keys())):
-            p_price = CURRENT_USER['cart'][p_name][0]
-            p_num = CURRENT_USER['cart'][p_name][1]
-            p_amount = p_price * p_num
-            total_amount += p_amount
-            print(r'%d. %-10s %10d x %3d = %d' % (p_id, p_name, p_price, p_num, p_amount))
-        print('结算金额: %d' % total_amount)
-    else:
-        print('你的购物车空空如也')
+def cart_display():
+    while True:
+        # 分割线
+        print(sep_row)
+        # 如果当前用户购物车中有商品
+        if CURRENT_USER['cart']:
+            # 结算总金额
+            total_amount = 0
+            # 对购物车的商品名称进行排序，然后枚举并打印序号和商品明细
+            for p_id, p_name in enumerate(sorted(CURRENT_USER['cart'].keys())):
+                p_price = CURRENT_USER['cart'][p_name][0]
+                p_num = CURRENT_USER['cart'][p_name][1]
+                p_amount = p_price * p_num
+                total_amount += p_amount
+                print(r'%d. %-10s %10d x%2d = %d' % (p_id, p_name, p_price, p_num, p_amount))
+            print('总金额: %d' % total_amount)
+            # 如果用户有足够的钱支付，则打印结算选项
+            if CURRENT_USER['wallet'] - total_amount >= 0:
+                user_action = input('(p)付款  (u)编辑购物车  请选择：')
+                payable_flag = True
+            else:
+                user_action = input('您的余额不足，(r)充值  (u)编辑购物车  请选择：')
+                payable_flag = False
+            # 判断用户选择
+            if payable_flag and user_action == 'p':
+                # 付款
+                pass
+            elif not payable_flag and user_action == 'r':
+                # 充值
+                user_recharge_money()
+            elif user_action == 'u':
+                # 更新购物车
+                pass
+            else:
+                print('您的输入有误，请重新输入')
+                continue
+        # 购物车中没有商品，任意键返回
+        else:
+            print('你的购物车空空如也\n\n(b)返回')
+            input()
+            return
 
 
 # 更新购物车函数
-def update_cart(action, p_name, p_price, p_num):
+def cart_update(action, p_name, p_price, p_num):
     # 检查购物车中是否已有该商品，如果没有，则创建一个且件数为0
     CURRENT_USER['cart'][p_name] = CURRENT_USER['cart'].get(p_name, [p_price, 0])
     # 往购物车加入商品
@@ -145,6 +177,7 @@ def update_cart(action, p_name, p_price, p_num):
     save_user_info(CURRENT_USER)
 
 
+# 程序入口
 if __name__ == '__main__':
     # 用户输入身份信息
     username = input('请问您是? ').strip()
@@ -159,7 +192,7 @@ if __name__ == '__main__':
     else:
         print('你是新顾客')
         CURRENT_USER = dict()
-        user_recharge_money(CURRENT_USER)
+        user_recharge_money()
         CURRENT_USER['name'] = username
         CURRENT_USER['log'] = []
         CURRENT_USER['cart'] = dict()
@@ -186,7 +219,7 @@ if __name__ == '__main__':
                 shopping_menu(CURRENT_USER, menu_ds)
         # 如果输入2，则进行充值
         elif entry_choice == '2':
-            user_recharge_money(CURRENT_USER)
+            user_recharge_money()
         # 用户的其他输入视为错误，并要求重新输入
         else:
             print('您的输入有误，请重新输入')

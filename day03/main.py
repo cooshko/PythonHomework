@@ -109,7 +109,56 @@ def remove_record():
     如果record存在但仍有其他record，则只删除用户指定的record，其他不管，返回True
     :return:
     """
-    pass
+    interest_flag = False
+    removed_flag = False
+    truncated_flag = False
+    backend_has_other_record = False
+    dict_json = input("请输入您要删除的信息（json格式）：").strip()
+    try:
+        remove_record_dict = json.loads(dict_json)
+        remove_record_line = "        server {r_server} {r_server} weight {r_wt} maxconn {r_mc}"\
+            .format(r_server=remove_record_dict['record']['server'],
+                    r_wt=remove_record_dict['record']['weight'],
+                    r_mc=remove_record_dict['record']['maxconn'])
+        with open(CONF_FILE) as cfg, open(TMP_CONF_FILE, 'w') as tmp:
+            for line in cfg:
+                if line.startswith('backend ' + remove_record_dict['backend']):
+                    # 接下里的内容是感兴趣区域
+                    interest_flag = True
+                    # 记录tmp文件的当前指针位置，如果没有record，则需要删除整个backend
+                    tmp_backend_pointer = tmp.tell()
+                if interest_flag and line.strip().startswith('server'):
+                    # 如果感兴趣区域里，行首以server开头则判断
+                    if remove_record_line in line:
+                        # 如果该行是要移除的record字符串，则不进行记录，并标记已进行移除工作
+                        removed_flag = True
+                        continue
+                    else:
+                        # 如果改行是另外的record记录，则代表该backend还有其他的record
+                        backend_has_other_record = True
+                if interest_flag and not line.strip():
+                    # 感兴趣区域的空行代表感兴趣区域的结束
+                    interest_flag = False
+                    # 感兴趣区域的结束，需要进行清理工作
+                    if not backend_has_other_record:
+                        # 如果backend没有其他record，则清理整个backend
+                        tmp.seek(tmp_backend_pointer)
+                        tmp.truncate()
+                        truncated_flag = True
+                # 将line写入临时文件
+                tmp.write(line)
+
+            if removed_flag and not backend_has_other_record and not truncated_flag:
+                # 针对感兴趣区域在文件末尾的清理工作
+                # 如果移除过记录，backend没有其他record，并且未进行truncate
+                tmp.seek(tmp_backend_pointer)
+                tmp.truncate()
+
+        # 切换配置文件
+        switch_file()
+    except json.JSONDecodeError:
+        print("您的输入有误，请检查后重新输入".center(64, '*'))
+        return False
 
 
 def switch_file():

@@ -70,10 +70,14 @@ def add_record():
                         interest_flag = True
                     elif interest_flag:
                         # 该行属于感兴趣
-                        if line.strip():
+                        if not line.strip():
                             # 如果是感兴趣区域的空行，视为感兴趣的结束行
+                            if not has_updated_flag:
+                                # 如果在感兴趣区域结束时，仍没有更新过，那么将在结束行前，插入新record，并打上更新标记
+                                line = new_record_line + '\n'
+                                has_updated_flag = True
                             interest_flag = False
-                        elif line.strip().startswith('server') and line.find(new_record_dict['record']['server']):
+                        elif line.strip().startswith('server') and (new_record_dict['record']['server']+' ' in line):
                             # 如果该行是record行，且包含用户输入的record的ip地址，则替换line内容
                             line = new_record_line
                             # 打上更新标记
@@ -81,10 +85,16 @@ def add_record():
                 # 将line内容写入haproxy.cfg.tmp
                 tmp.write(line)
 
+            if interest_flag and not has_updated_flag:
+                # 如果感兴趣区域位于底部，需要补一刀
+                tmp.write(new_record_line)
+                has_updated_flag = True
+
             if not has_updated_flag:
                 # 如果遍历过所有行，都没有找到backend，则在文件末尾添加
-                tmp.write(backend_line + '\n' + new_record_line)
-
+                tmp.write('\n\n' + backend_line + '\n' + new_record_line)
+        # 切换配置文件
+        switch_file()
         return True
     except json.JSONDecodeError:
         print("您的输入有误，请检查后重新输入".center(64, '*'))

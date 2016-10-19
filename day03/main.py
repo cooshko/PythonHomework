@@ -156,6 +156,7 @@ def remove_record():
 
         # 切换配置文件
         switch_file()
+        return removed_flag
     except json.JSONDecodeError:
         print("您的输入有误，请检查后重新输入".center(64, '*'))
         return False

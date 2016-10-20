@@ -163,8 +163,8 @@ def cash_from_credit():
                 CURRENT_USER['credit_available'] -= total
                 wallet_before = CURRENT_USER['wallet']
                 CURRENT_USER['wallet'] += cash
-                atm_log(action='提现', amount=cash)
-                atm_log(action='提现手续费', amount=cost)
+                atm_log(action='提现', amount=cash, merchant='ATM')
+                atm_log(action='提现手续费', amount=cost, merchant='ATM')
                 save_user(CURRENT_USER)
                 print("提现成功！提现前现金：%.2f， 提现后现金%.2f" % (wallet_before, CURRENT_USER['wallet']))
                 return True
@@ -192,12 +192,21 @@ def trans_money():
     pass
 
 
-def display_atm_log():
+def display_atm_log(limit=10):
     """
     查看ATM日志
+    limit参数用于接收要显示日志记录的数量
+    默认10条
     :return:
     """
-    pass
+    if CURRENT_USER.get('atm_log'):
+        print(SEP_ROW)
+        print("%-30s %-30s %-30s %-30s" % ("交易日期", "类型", "金额", "对方帐号"))
+        for record in CURRENT_USER['atm_log'][0:limit]:
+            print("%-30s %-30s %-30s %-30s" % (record[0], record[1], record[2], record[3]))
+    else:
+        print("没有任何操作记录".center(60, '*'))
+    input("按回车返回")
 
 
 def atm_log(*args, **kwargs):
@@ -249,10 +258,9 @@ def atm_menu():
     ATM菜单：提现、还款、额度、转账，操作记录
     :return:
     """
-    print("ATM Menu".center(60, '='))
     while True:
-        print("""
-1. 提现
+        print("ATM Menu".center(60, '='))
+        print("""1. 提现
 2. 还款
 3. 额度
 4. 转账

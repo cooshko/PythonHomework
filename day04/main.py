@@ -256,9 +256,9 @@ def display_atm_log(limit=10):
     """
     if CURRENT_USER.get('atm_log'):
         print(SEP_ROW)
-        print("%-30s %-30s %-30s %-30s" % ("交易日期", "类型", "金额", "对方帐号"))
+        print("%-20s %-20s %-20s %-20s %-20s" % ("交易日期", "类型", "金额", "对方帐号", "截数日"))
         for record in CURRENT_USER['atm_log'][0:limit]:
-            print("%-30s %-30s %-30s %-30s" % (record[0], record[1], record[2], record[3]))
+            print("%-20s %-20s %-20.2f %-20s %-20s" % (record[0], record[1], record[2], record[3], record[4]))
     else:
         print("没有任何操作记录".center(60, '*'))
     input("按回车返回")
@@ -273,12 +273,19 @@ def atm_log(*args, **kwargs):
     action = kwargs.get('action', '未知操作')
     merchant = kwargs.get('merchant', '')
     amount = kwargs.get('amount', 0)
-    if action in ['消费', '转出', '提现', '提现手续费']:
-        amount_str = '-' + str(amount)
-    elif action in ['还款', '转入']:
-        amount_str = '+' + ("%.2f" % amount)
-    else:
-        amount_str = str("%.2f" % amount)
+    need_payback_on = None
+    settled_on = None
+    if action in ['消费',  '提现', '提现手续费']:
+        year = datetime.datetime.now().year
+        month = datetime.datetime.now().month
+        if month == 12:
+            p_year = year + 1
+            p_month = 1
+        else:
+            p_year = year
+            p_month = month + 1
+        p_day = 15
+        need_payback_on = datetime.datetime(p_year, p_month, p_day, 23, 59).timestamp()
     if kwargs.get('guest'):
         # 对另外一个客人帐号进行写ATM日志
         p = kwargs.get('guest')
@@ -287,7 +294,7 @@ def atm_log(*args, **kwargs):
         p = CURRENT_USER
     if not p.get('atm_log'):
         p['atm_log'] = list()
-    p['atm_log'].insert(0, [log_time, action, amount_str, merchant])
+    p['atm_log'].insert(0, [log_time, action, amount, merchant, need_payback_on])
     save_user(p)
 
 
@@ -327,6 +334,7 @@ def atm_menu():
 4. 转账
 5. 交易记录
 6. 设置信用额度
+7. 存款
 
 (b)返回""")
         user_choice = input("请选择：").strip()
@@ -361,9 +369,10 @@ def atm_menu():
                         print("请输入大于0的数值")
                 except:
                     print("你输入的格式有误".center(60, '*'))
+        elif user_choice == '7':
+            user_recharge_money()
         elif user_choice == 'b':
             return True
-
 
 
 @auth_deco
@@ -661,7 +670,19 @@ def user_recharge_money():
             print('输入格式有误，请重新输入')
 
 
-
+def make_invoice():
+    """
+    出账单
+    :return:
+    """
+    year = datetime.datetime.now().year
+    month = datetime.datetime.now().month
+    if month == 1:
+        p_month = 12
+        p_year = year - 1
+    else:
+        p_month = month
+        p_year = year
 
 
 

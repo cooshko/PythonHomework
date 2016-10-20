@@ -36,12 +36,12 @@ def auth_deco(func):
     :param func:
     :return:
     """
-    while True:
+    def wrapper(*args, **kwargs):
         if LOGINED or auth():
-            def wrapper(*args, **kwargs):
-                ret = func(*args, **kwargs)
-                return ret
-            return wrapper
+            ret = func(*args, **kwargs)
+            return ret
+    return wrapper
+
 
 
 def auth():
@@ -50,6 +50,7 @@ def auth():
     :return:
     """
     global CURRENT_USER, LOGINED
+    CURRENT_USER = dict()
     while True:
         print(SEP_ROW)
         user_input = input('请输入账户名称：').strip()
@@ -89,7 +90,8 @@ def admin_entry():
 2. 修改用户额度
 3. 锁定/解锁帐号
 
-(b)返回''')
+(q)退出''')
+    global LOGINED
     user_choice = input('请选择：').strip()
     if user_choice == '1':
         # 创建帐号
@@ -121,6 +123,9 @@ def admin_entry():
                 print('修改失败'.center(64, '*'))
         else:
             print("您的输入有误")
+    elif user_choice == 'q':
+        LOGINED = False
+        return
 
 
 def load_user_info(username: str):
@@ -174,6 +179,27 @@ def cash_from_credit():
             else:
                 # 用户输入了0或负数
                 print("你输入的格式有误，请重新输入")
+        else:
+            return False
+
+
+def pay_by_credit_card(total_amount):
+    """
+    信用卡消费接口
+    :param total_amount:
+    :return: 成功扣费则记录日志并返回True，否则返回False
+    """
+    if total_amount <= 0:
+        raise ValueError('结算金额不能小于等于0')
+    if total_amount < CURRENT_USER['credit_available']:
+        CURRENT_USER['credit_available'] -= total_amount
+        atm_log(action="消费", amount=total_amount, merchant="商城")
+        shopping_log(total_amount)
+        save_user(CURRENT_USER)
+        return True
+    else:
+        print("没有足够的可用额度")
+        return False
 
 
 def settle_payment():
@@ -189,7 +215,36 @@ def trans_money():
     转账
     :return:
     """
-    pass
+    while True:
+        print("转 账".center(60, '='))
+        recv_person = input("请输入对方帐号名称（留空则返回）：").strip()
+        if recv_person:
+            if os.path.isfile(os.path.join(DB_DIR, recv_person + '.json')):
+                rp = load_user_info(recv_person)
+                if rp:
+                    amount_str = input("请输入要转账的金额：").strip()
+                    amount = float(amount_str)
+                    if 0 < amount <= CURRENT_USER['wallet']:
+                        CURRENT_USER['wallet'] -= amount
+                        rp['wallet'] += amount
+                        atm_log(action="转出", amount=amount, merchant=recv_person)
+                        atm_log(action="转入", amount=amount, merchant=CURRENT_USER['name'], guest=rp)
+                        save_user(CURRENT_USER)
+                        print("转账成功！")
+                        return True
+                    elif amount <= 0:
+                        print("你输入有误，请重新输入")
+                        continue
+                    else:
+                        print("你的帐号余额不足，无法完成转账")
+                        return False
+                else:
+                    print("对方帐号存在异常，无法完成转账")
+                    return False
+            else:
+                print("你输入的帐号不存在")
+        else:
+            return False
 
 
 def display_atm_log(limit=10):
@@ -221,15 +276,19 @@ def atm_log(*args, **kwargs):
     if action in ['消费', '转出', '提现', '提现手续费']:
         amount_str = '-' + str(amount)
     elif action in ['还款', '转入']:
-        amount_str = '+' + str(amount)
+        amount_str = '+' + ("%.2f" % amount)
     else:
-        amount_str = str(amount)
-
-    if not CURRENT_USER.get('atm_log'):
-        CURRENT_USER['atm_log'] = list()
-
-    CURRENT_USER['atm_log'].insert(0, [log_time, action, amount_str, merchant])
-    save_user(CURRENT_USER)
+        amount_str = str("%.2f" % amount)
+    if kwargs.get('guest'):
+        # 对另外一个客人帐号进行写ATM日志
+        p = kwargs.get('guest')
+    else:
+        # 对当前用户进行写ATM日志
+        p = CURRENT_USER
+    if not p.get('atm_log'):
+        p['atm_log'] = list()
+    p['atm_log'].insert(0, [log_time, action, amount_str, merchant])
+    save_user(p)
 
 
 def guest_entry():
@@ -237,20 +296,22 @@ def guest_entry():
     客人的菜单
     :return:
     """
+    global LOGINED
     while True:
         print(SEP_ROW)
         user_choice = input("""
 1. 购物
 2. ATM
 
-(b)返回
+(q)退出
 请选择：""")
         if user_choice == '1':
             shopping_menu(MENU_DATA)
         elif user_choice == '2':
             atm_menu()
-        elif user_choice == 'b':
-            return True
+        elif user_choice == 'q':
+            LOGINED = False
+            return False
 
 
 def atm_menu():
@@ -262,9 +323,10 @@ def atm_menu():
         print("ATM Menu".center(60, '='))
         print("""1. 提现
 2. 还款
-3. 额度
+3. 查询
 4. 转账
-5. 查询操作记录
+5. 交易记录
+6. 设置信用额度
 
 (b)返回""")
         user_choice = input("请选择：").strip()
@@ -273,9 +335,19 @@ def atm_menu():
         elif user_choice == '2':
             settle_payment()
         elif user_choice == '3':
+            print("你当前的\n信用额度上限为：%.2f" % CURRENT_USER.get('credit_limit', 0))
+            print("可用额度为 %.2f" % CURRENT_USER.get('credit_available', 0))
+            print("现金余额为 %.2f" % CURRENT_USER.get('wallet', 0))
+        elif user_choice == '4':
+            # 转账
+            trans_money()
+        elif user_choice == '5':
+            # 查询
+            display_atm_log()
+        elif user_choice == '6':
             # 设置信用卡额度
-            print("你当前的信用额度为：%.2f" % CURRENT_USER.get('credit_limit', 0))
-            new_limit_str = input("设置新信用额度：").strip()
+            print("你当前的\n信用额度上限为：%.2f" % CURRENT_USER.get('credit_limit', 0))
+            new_limit_str = input("设置新信用额度（留空则返回）：").strip()
             if new_limit_str:
                 try:
                     new_limit = float(new_limit_str)
@@ -289,12 +361,6 @@ def atm_menu():
                         print("请输入大于0的数值")
                 except:
                     print("你输入的格式有误".center(60, '*'))
-        elif user_choice == '4':
-            # 转账
-            trans_money()
-        elif user_choice == '5':
-            # 查询
-            display_atm_log()
         elif user_choice == 'b':
             return True
 
@@ -469,20 +535,23 @@ def cart_display():
             print('总金额: %.2f' % total_amount)
             # 如果用户有足够的钱支付，则打印结算选项
             if CURRENT_USER['wallet'] - total_amount >= 0:
-                user_action = input('(p)付款  (u)编辑购物车 (b)返回  请选择：')
+                user_action = input('(p)现金付款  (c)信用卡  (u)编辑购物车 (b)返回  请选择：')
                 payable_flag = True
             else:
-                user_action = input('您的余额不足，(r)充值  (u)编辑购物车 (b)返回  请选择：')
+                user_action = input('您的余额不足，(c)信用卡  (u)编辑购物车 (b)返回  请选择：')
                 payable_flag = False
             # 判断用户选择
             if payable_flag and user_action == 'p':
                 # 付款
-                user_pay(total_amount)
+                pay_by_cash(total_amount)
                 return True
-            elif not payable_flag and user_action == 'r':
-                # 充值
-                user_recharge_money()
-                continue
+            elif user_action == 'c':
+                # 信用卡付款
+                ret = pay_by_credit_card(total_amount)
+                if ret:
+                    return True
+                else:
+                    continue
             elif user_action == 'b':
                 return
             elif user_action == 'u':
@@ -534,16 +603,17 @@ def log_display():
     input('任意键返回')
 
 
-# 用户支付
-def user_pay(total_amount: float):
-    # 扣钱
-    CURRENT_USER['wallet'] -= total_amount
-    # 写入日志
+def shopping_log(total_amount: float):
+    """
+    购物日志
+    :param total_amount:
+    :return:
+    """
     dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     # 每一个购物车商品记录为一行日志
     for p_name, p in CURRENT_USER['cart'].items():
         # 记录的内容为购买日期时间、商品名称、数量、单项商品总金额
-        log_msg = "%s %s %.2f %d %.2f" % (dt, p_name, p[0], p[1], p[0]*p[1])
+        log_msg = "%s %s %.2f %d %.2f" % (dt, p_name, p[0], p[1], p[0] * p[1])
         CURRENT_USER['log'].append(log_msg)
         CURRENT_BUY_LOG.append(log_msg)
     # 清空购物车
@@ -552,6 +622,20 @@ def user_pay(total_amount: float):
     save_user(CURRENT_USER)
     print('谢谢，您总共消费%.2f元，点击任意键返回' % total_amount)
     input()
+
+
+def pay_by_cash(total_amount: float):
+    """
+    现金支付
+    :param total_amount:
+    :return:
+    """
+    if CURRENT_USER['wallet'] >= total_amount:
+        CURRENT_USER['wallet'] -= total_amount
+        shopping_log(total_amount)
+        return True
+    else:
+        return False
 
 
 def user_recharge_money():
@@ -584,4 +668,5 @@ def user_recharge_money():
 
 
 if __name__ == '__main__':
-    select_entry()
+    while True:
+        select_entry()

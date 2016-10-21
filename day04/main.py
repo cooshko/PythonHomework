@@ -10,6 +10,8 @@ DB_DIR = os.path.join(APP_DIR, 'db')
 CURRENT_USER = dict()
 LOGINED = False
 CURRENT_BUY_LOG = list()
+INVOICE_DAY = 1
+PAYBACK_DAY = 15
 MENU_DATA = {
     '家电': [
         ('洗衣机', 1999.0),
@@ -38,6 +40,7 @@ def auth_deco(func):
     """
     def wrapper(*args, **kwargs):
         if LOGINED or auth():
+            after_guest_login()
             ret = func(*args, **kwargs)
             return ret
     return wrapper
@@ -202,12 +205,46 @@ def pay_by_credit_card(total_amount):
         return False
 
 
-def settle_payment():
+def settle_invoice_manually():
     """
-    信用卡还款
+    人手操作信用卡还款
     :return:
     """
-    pass
+    while True:
+        print("本期应还款 %.2f" % CURRENT_USER.get('invoice_amount', 0))
+        pay_amount_str = input("请输入你要还款的金额（留空则返回）：").strip()
+        if pay_amount_str:
+            pay_amount = float(pay_amount_str)
+            if CURRENT_USER['wallet'] >= pay_amount:
+                # 钱包里有足够的钱，扣减现金和应付金额
+                CURRENT_USER['wallet'] -= pay_amount
+                CURRENT_USER['invoice_amount'] -= pay_amount
+                save_user(CURRENT_USER)
+                atm_log(action='还款', amount=pay_amount, merchant='ATM')
+                return True
+            else:
+                # 钱包里没有足够的钱
+                print("余额不足，请重新输入")
+        else:
+            return False
+
+
+def settle_invoice_automaticly(guest: dict):
+    # 自动还款
+    invoice_amount = guest.get('invoice_amount', 0)
+    wallet = guest.get('wallet', 0)
+    if wallet >= invoice_amount:
+        # 够钱
+        kv = {
+                'invoice_amount': 0,
+                'wallet': wallet - invoice_amount
+             }
+        guest.update(kv)
+        atm_log(guest=guest, action='自动还款', amount=invoice_amount, merchant='ATM')
+        return True
+    else:
+        # 不够钱
+        return False
 
 
 def trans_money():
@@ -256,9 +293,9 @@ def display_atm_log(limit=10):
     """
     if CURRENT_USER.get('atm_log'):
         print(SEP_ROW)
-        print("%-20s %-20s %-20s %-20s %-20s" % ("交易日期", "类型", "金额", "对方帐号", "截数日"))
+        print("%-20s %-20s %-20s %-20s" % ("交易日期", "类型", "金额", "对方帐号"))
         for record in CURRENT_USER['atm_log'][0:limit]:
-            print("%-20s %-20s %-20.2f %-20s %-20s" % (record[0], record[1], record[2], record[3], record[4]))
+            print("%-20s %-20s %-20.2f %-20s" % (record[0], record[1], float(record[2]), record[3]))
     else:
         print("没有任何操作记录".center(60, '*'))
     input("按回车返回")
@@ -294,7 +331,7 @@ def atm_log(*args, **kwargs):
         p = CURRENT_USER
     if not p.get('atm_log'):
         p['atm_log'] = list()
-    p['atm_log'].insert(0, [log_time, action, amount, merchant, need_payback_on])
+    p['atm_log'].insert(0, [log_time, action, amount, merchant])
     save_user(p)
 
 
@@ -321,6 +358,33 @@ def guest_entry():
             return False
 
 
+def after_guest_login():
+    """
+    用户登录后运行的任务，比如生成账单、提醒还款
+    :return:
+    """
+    global PAYBACK_DAY
+    current_month = datetime.datetime.now().month
+    current_day = datetime.datetime.now().day
+    invoice_genate_month = CURRENT_USER.get('invoice_genate_month', 0)
+    last_month = current_month - 1 if current_month > 1 else 12
+    if current_day >= INVOICE_DAY:
+        # 每月生成上月账单
+        if invoice_genate_month != current_month:
+            make_invoice(CURRENT_USER)
+            # 如果生成了账单（True），则提醒用户账单，False则视不提醒
+        display_invoice(CURRENT_USER)
+    return True
+
+
+def display_invoice(guest: dict):
+    if guest:
+        invoice_amount = guest.get('invoice_amount', 0)
+        if invoice_amount:
+            print(SEP_ROW)
+            print("你本期账单应还款：%.2f" % invoice_amount)
+
+
 def atm_menu():
     """
     ATM菜单：提现、还款、额度、转账，操作记录
@@ -330,7 +394,7 @@ def atm_menu():
         print("ATM Menu".center(60, '='))
         print("""1. 提现
 2. 还款
-3. 查询
+3. 账户查询
 4. 转账
 5. 交易记录
 6. 设置信用额度
@@ -341,11 +405,14 @@ def atm_menu():
         if user_choice == '1':
             cash_from_credit()
         elif user_choice == '2':
-            settle_payment()
+            if settle_invoice_manually():
+                print("还款成功，你目前的账单金额为 %.2f" % CURRENT_USER.get('invoice_amount', 0))
         elif user_choice == '3':
+            print(SEP_ROW)
             print("你当前的\n信用额度上限为：%.2f" % CURRENT_USER.get('credit_limit', 0))
             print("可用额度为 %.2f" % CURRENT_USER.get('credit_available', 0))
             print("现金余额为 %.2f" % CURRENT_USER.get('wallet', 0))
+            input("按回车返回")
         elif user_choice == '4':
             # 转账
             trans_money()
@@ -360,11 +427,9 @@ def atm_menu():
                 try:
                     new_limit = float(new_limit_str)
                     if new_limit > 0:
-                        ret = modify_guest(CURRENT_USER['name'], credit_limit=new_limit)
-                        if ret:
-                            print("修改额度成功！".center(60, '*'))
-                        else:
-                            print("修改额度失败！".center(60, '*'))
+                        CURRENT_USER['credit_limit']=new_limit
+                        save_user(CURRENT_USER)
+                        print("修改额度成功！".center(60, '*'))
                     else:
                         print("请输入大于0的数值")
                 except:
@@ -670,7 +735,7 @@ def user_recharge_money():
             print('输入格式有误，请重新输入')
 
 
-def make_invoice():
+def make_invoice(guest: dict):
     """
     出账单
     :return:
@@ -681,10 +746,26 @@ def make_invoice():
         p_month = 12
         p_year = year - 1
     else:
-        p_month = month
+        p_month = month - 1
         p_year = year
-
-
+    p_prefix = "%d-%02d" % (p_year, p_month)
+    # 读取上月atm消费、提现、提现手续费、利息
+    p_record_list = list(filter(
+        lambda r: str(r[0]).startswith(p_prefix) and r[1] in ['消费', '提现', '提现手续费', '利息'],
+        CURRENT_USER.get('atm_log', [])
+    ))
+    invoice_amount = 0
+    if len(p_record_list) > 0:
+        for record in p_record_list:
+            invoice_amount += float(record[2])
+        invoice_amount = abs(invoice_amount)
+        guest.update({'invoice_amount': invoice_amount + guest.get('invoice_amount', 0),
+                      'invoice_month': p_month,
+                      'invoice_genate_month': month
+                      })
+        save_user(guest)
+        return True
+    return
 
 
 

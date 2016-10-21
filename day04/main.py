@@ -11,7 +11,7 @@ CURRENT_USER = dict()
 LOGINED = False
 CURRENT_BUY_LOG = list()
 INVOICE_DAY = 1
-PAYBACK_DAY = 15
+PAYBACK_DAY = 21
 MENU_DATA = {
     '家电': [
         ('洗衣机', 1999.0),
@@ -44,7 +44,6 @@ def auth_deco(func):
             ret = func(*args, **kwargs)
             return ret
     return wrapper
-
 
 
 def auth():
@@ -89,6 +88,7 @@ def admin_entry():
     管理员入口
     :return:
     """
+    print(SEP_ROW)
     print('''1. 添加账户
 2. 修改用户额度
 3. 锁定/解锁帐号
@@ -98,7 +98,8 @@ def admin_entry():
     user_choice = input('请选择：').strip()
     if user_choice == '1':
         # 创建帐号
-        create_guest()
+        if create_guest():
+            print("创建成功。")
     elif user_choice == '2':
         # 修改帐号的信用额度
         guest_name = input("请输入账户名称：").strip()
@@ -129,6 +130,8 @@ def admin_entry():
     elif user_choice == 'q':
         LOGINED = False
         return
+    else:
+        print("你的输入有误，请重新输入")
 
 
 def load_user_info(username: str):
@@ -219,6 +222,7 @@ def settle_invoice_manually():
                 # 钱包里有足够的钱，扣减现金和应付金额
                 CURRENT_USER['wallet'] -= pay_amount
                 CURRENT_USER['invoice_amount'] -= pay_amount
+                CURRENT_USER['credit_available'] += pay_amount
                 save_user(CURRENT_USER)
                 atm_log(action='还款', amount=pay_amount, merchant='ATM')
                 return True
@@ -237,7 +241,8 @@ def settle_invoice_automaticly(guest: dict):
         # 够钱
         kv = {
                 'invoice_amount': 0,
-                'wallet': wallet - invoice_amount
+                'wallet': wallet - invoice_amount,
+                'credit_available': CURRENT_USER['credit_available'] + invoice_amount
              }
         guest.update(kv)
         atm_log(guest=guest, action='自动还款', amount=invoice_amount, merchant='ATM')
@@ -264,7 +269,7 @@ def trans_money():
                     if 0 < amount <= CURRENT_USER['wallet']:
                         CURRENT_USER['wallet'] -= amount
                         rp['wallet'] += amount
-                        atm_log(action="转出", amount=amount, merchant=recv_person)
+                        atm_log(action="转出", amount=-1 * amount, merchant=recv_person)
                         atm_log(action="转入", amount=amount, merchant=CURRENT_USER['name'], guest=rp)
                         save_user(CURRENT_USER)
                         print("转账成功！")
@@ -310,8 +315,6 @@ def atm_log(*args, **kwargs):
     action = kwargs.get('action', '未知操作')
     merchant = kwargs.get('merchant', '')
     amount = kwargs.get('amount', 0)
-    need_payback_on = None
-    settled_on = None
     if action in ['消费',  '提现', '提现手续费']:
         year = datetime.datetime.now().year
         month = datetime.datetime.now().month
@@ -363,6 +366,8 @@ def after_guest_login():
     用户登录后运行的任务，比如生成账单、提醒还款
     :return:
     """
+    if CURRENT_USER.get('type') != 'guest':
+        return True
     global PAYBACK_DAY
     current_month = datetime.datetime.now().month
     current_day = datetime.datetime.now().day
@@ -374,6 +379,11 @@ def after_guest_login():
             make_invoice(CURRENT_USER)
             # 如果生成了账单（True），则提醒用户账单，False则视不提醒
         display_invoice(CURRENT_USER)
+    if current_day == PAYBACK_DAY:
+        # 定期还款
+        if settle_invoice_automaticly(CURRENT_USER):
+            print("自动还款成功！")
+
     return True
 
 
@@ -421,6 +431,7 @@ def atm_menu():
             display_atm_log()
         elif user_choice == '6':
             # 设置信用卡额度
+            print(SEP_ROW)
             print("你当前的\n信用额度上限为：%.2f" % CURRENT_USER.get('credit_limit', 0))
             new_limit_str = input("设置新信用额度（留空则返回）：").strip()
             if new_limit_str:
@@ -490,6 +501,7 @@ def create_guest():
         'wallet': g_wallet
     }
     save_user(guest_dict)
+    return True
 
 
 def modify_guest(guest_name, **kwargs):
@@ -714,16 +726,12 @@ def pay_by_cash(total_amount: float):
 
 def user_recharge_money():
     """
-    充值函数，相当于放现金到钱包里
+    现金充值函数
     :return:
     """
     user = CURRENT_USER
     print(SEP_ROW)
-    if user['new_guy']:
-        user['wallet'] = 0
-        user['new_guy'] = False
-    else:
-        print('当前余额：%.2f' % user['wallet'])
+    print('当前余额：%.2f' % user['wallet'])
     while True:
         recharge = input('请输入你要充值的金额：').strip()
         try:

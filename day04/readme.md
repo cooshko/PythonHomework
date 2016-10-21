@@ -23,3 +23,10 @@ ATM：
 程序的主入口只有main.py
 管理员用户密码均是admin
 客人的测试帐号有两个，分别是coosh和panny，密码均是123
+
+备注：使用了装饰器实现用户登录
+```
+@auth_deco
+def select_entry():
+```
+该函数是整个程序的入口

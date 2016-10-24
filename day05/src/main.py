@@ -3,6 +3,9 @@
 # @Author  : Coosh
 # @File    : main.py
 
+"""
+该版本没有使用正则
+"""
 
 def calc(exp: str):
     if r')' in exp:

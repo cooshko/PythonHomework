@@ -24,8 +24,9 @@ class Teacher(Person):
         money = abs(money)
         self.asset += money
         self.gain_log.append([dt, money, reason])
+        self.save()
 
-    def lose(self, money, reason):
+    def lose(self, reason, money=10):
         """
         扣钱、理由
         :param money:
@@ -36,12 +37,13 @@ class Teacher(Person):
         money = -1 * abs(money)
         self.asset += money
         self.lose_log.append([dt, money, reason])
+        self.save()
 
 
 if __name__ == '__main__':
-    # t = Teacher('alex', 'male', 30, 15000)
-    # t.save()
-    t = Person.load('teacher', 'alex')
-    t.gain(100, "鸡汤课")
-    t.lose(10, "差评")
-    print(t.asset)
+    t = Teacher('银角大王', 'male', 29, 15000)
+    t.save()
+    # t = Person.load('teacher', 'alex')
+    # t.gain(100, "鸡汤课")
+    # t.lose(10, "差评")
+    # print(t.asset)

@@ -12,12 +12,14 @@ class Lesson:
     APP_DIR = os.path.dirname(os.path.dirname(__file__))
     LESSON_DB_DIR = os.path.join(APP_DIR, 'db', 'lesson')
 
-    def __init__(self, name, money, classtime, teacher: Teacher):
-        self.name = name
-        self.teacher = Teacher.load('teacher', teacher)
-        self.teacher = teacher
-        self.money = money
-        self.classtime = classtime
+    def __init__(self, name, money, classtime, skill, teacher):
+        self.name = name    # 课程名称
+        # self.teacher = Teacher.load('teacher', teacher)
+        self.teacher = teacher    # 负责的讲师
+        self.money = money    # 课时费
+        self.classtime = classtime    # 课堂时间
+        self.skill = skill    # 技能（上课的内容）
+        self.save()
 
     def lesson_on(self):
         print('上%s' % self.name)
@@ -58,8 +60,10 @@ class Lesson:
 
 
 if __name__ == '__main__':
-    l = Lesson('Python课', 100, '19:00', '银角大王')
-    l.save()
-    # l = Lesson.load("鸡汤课")
-    # print(l.teacher.asset)
-    # print(Lesson.load_all_lesson()[0].name)
+    t = Teacher.load('teacher', '银角大王')
+    l = Lesson('Python课', 100, '19:00', 'Python', t)
+    t = Teacher.load('teacher', 'alex')
+    l = Lesson('鸡汤课', 100, '18:00', '吹水', t)
+    l = Lesson.load("鸡汤课")
+    print(l.teacher.asset)
+    print(Lesson.load_all_lesson()[0].name)

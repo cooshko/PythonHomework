@@ -35,5 +35,12 @@ class Person:
     def test():
         print("Person")
 
+    def auth(self, username, password):
+        return self.name == username and self.password == password
+
+    def change_password(self, passwd):
+        self.password = passwd
+        self.save()
+
 if __name__ == '__main__':
     p = Person.load('teacher', 'alex')

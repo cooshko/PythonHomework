@@ -6,6 +6,8 @@ import datetime
 
 
 class Teacher(Person):
+    role = 'teacher'
+
     def __init__(self, name, gender, age, asset):
         self.name = name
         self.gender = gender
@@ -14,6 +16,7 @@ class Teacher(Person):
         self.role = 'teacher'
         self.gain_log = []
         self.lose_log = []
+        self.save()
 
     def gain(self, money, reason):
         """
@@ -42,8 +45,7 @@ class Teacher(Person):
 
 if __name__ == '__main__':
     t = Teacher('银角大王', 'male', 29, 15000)
-    t.save()
-    # t = Person.load('teacher', 'alex')
-    # t.gain(100, "鸡汤课")
-    # t.lose(10, "差评")
-    # print(t.asset)
+    t = Person.load('teacher', 'alex')
+    t.gain(100, "鸡汤课")
+    t.lose("差评", money=10)
+    print(t.asset)

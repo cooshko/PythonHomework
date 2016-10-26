@@ -13,12 +13,22 @@ while True:
     username = input("请输入用户名：").strip()
     password = input("密码：").strip()
     if username == 'admin':
-        pass
+        admin = Admin.load('admin', username)
+        if admin:
+            # 存在admin
+            if not admin.auth(username, password):
+                print("你输入的密码不正确")
+                continue
+        else:
+            # admin不存在，创建一个默认的，并执行admin任务
+            admin = Admin()
+        admin.todo()
     else:
         stu = Student.load('student', username)
         if stu:
             # 存在该学生
             if stu.auth(username, password):
+                # 认证通过，则执行student的任务
                 stu.todo()
             else:
                 print("你输入的密码不正确")

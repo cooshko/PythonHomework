@@ -38,9 +38,14 @@ class Person:
     def auth(self, username, password):
         return self.name == username and self.password == password
 
-    def change_password(self, passwd):
-        self.password = passwd
-        self.save()
+    def change_password(self):
+        password = input("请输入新密码：").strip()
+        if password:
+            self.password = password
+            print("修改密码成功")
+            self.save()
+        else:
+            print("密码不能为空")
 
 if __name__ == '__main__':
     p = Person.load('teacher', 'alex')

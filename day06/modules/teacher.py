@@ -24,7 +24,7 @@ class Teacher(Person):
         :return:
         """
         dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        money = abs(money)
+        money = abs(int(money))
         self.asset += money
         self.gain_log.append([dt, money, reason])
         self.save()

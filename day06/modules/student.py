@@ -15,7 +15,7 @@ class Student(Person):
         self.password = password    # 密码
         self.role = 'student'    # 角色，固定的
         self.lessons = []   # 已选课程。
-        self.lesson_log = []    # 上课记录
+        self.lesson_log = dict()    # 上课记录
         self.skills = set()    # 学习到的技能（学习内容）
         self.save()
 
@@ -50,7 +50,11 @@ class Student(Person):
                     print("你的输入有误")
             except Exception as e:
                 print("你的输入有误")
-        self.lesson_log.append([dt, lesson.name, lesson.teacher.name])
+        # self.lesson_log.append([dt, lesson.name, lesson.teacher.name])
+        if self.lesson_log.get(lesson.name):
+            self.lesson_log[lesson.name].append(dt)
+        else:
+            self.lesson_log[lesson.name] = [dt, ]
         self.save()
 
     def display_lessons(self):
@@ -71,10 +75,11 @@ class Student(Person):
         :return:
         """
         print("上课记录如下：")
-        fmt = r"%20s %20s %20s"
-        print(fmt % ("上课时间", "课程", "讲师"))
-        for record in self.lesson_log:
-            print(fmt % (record[0], record[1], record[2]))
+        fmt = r"%20s %20s"
+        print(fmt % ("上课时间", "课程"))
+        for l_name in sorted(self.lesson_log.keys()):
+            for l_time in self.lesson_log[l_name]:
+                print(fmt % (l_time, l_name))
         return True
 
     def todo(self):
@@ -86,8 +91,12 @@ class Student(Person):
             choice = input('\n请选择：').strip()
             if choice == '0':
                 self.display_lessons()
-                tl_num = int(input("\n请输入课堂编号：").strip())
-                self.take_lesson(self.lessons[tl_num])
+                tl_num = input("\n请输入课堂编号（留空返回）：").strip()
+                if tl_num:
+                    tl_num = int(tl_num)
+                    self.take_lesson(self.lessons[tl_num])
+                else:
+                    continue
             elif choice == '1':
                 print("所有课程如下：")
                 all_lessons = Lesson.load_all_lesson()
@@ -101,14 +110,9 @@ class Student(Person):
             elif choice == '3':
                 self.display_lesson_log()
             elif choice == '4':
-                password = input("请输入新密码：").strip()
-                if password:
-                    self.change_password(password)
-                    print("修改密码成功")
-                else:
-                    print("密码不能为空")
+                self.change_password()
             elif choice == '5':
-                break
+                return
 
 if __name__ == '__main__':
     stu = Student('coosh', 'male', '25', '123')

@@ -80,9 +80,11 @@ class Person:
             print(Person.paint_msg(msg))
             self.lover = self.carry_a_torch
             self.carry_a_torch = None
+            return True
         else:
             msg = str(self) + " 说：我会继续努力的！"
-            print(msg)
+            print(Person.paint_msg(msg))
+            return False
 
     def accept_counting(self, someone):
         """
@@ -99,7 +101,7 @@ class Person:
             self.carry_a_torch = None
             return True
         else:
-            msg = self + "说：很抱歉。。。"
+            msg = str(self) + "说：很抱歉。。。"
             print(Person.paint_msg(msg))
             return False
 

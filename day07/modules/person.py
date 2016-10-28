@@ -2,7 +2,12 @@
 # -*- coding: utf-8 -*-
 # @Author  : Coosh
 
+
 class Person:
+    @staticmethod
+    def paint_msg(msg:str):
+        pass
+
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
         self.age = kwargs.get('age')
@@ -37,6 +42,11 @@ class Person:
                 self.gain(income)
 
     def gain(self, money=1.0):
+        """
+        收入
+        :param money:
+        :return:
+        """
         print("%s 得到收入 %.2f" % (self.name, money))
         self.saving += money
 
@@ -65,7 +75,7 @@ class Person:
 
     def accept_counting(self, someone):
         """
-        接受求爱？
+        接受求爱？如果接受且目前有情人，会先抛弃现有情人
         :param someone:
         :return: 接受返回True，否则False
         """
@@ -87,7 +97,4 @@ class Person:
         someone.carry_torch_for(self)
 
 if __name__ == '__main__':
-    pd = dict(name='coosh', age=35, job='IT', race='yellow', country='China', skills=['IT', ], saving=66666.6, house=1,
-              car=0)
-    p = Person(**pd)
-    print(p.name)
+    pass

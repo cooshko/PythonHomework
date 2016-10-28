@@ -57,13 +57,13 @@ class Person:
         self.saving += money
 
     def dump_lover(self):
-        msg = "%s 甩掉了 %s" % (self.name, self.lover.name)
+        msg = "%s 甩掉了 %s" % (self, self.lover)
         print(Person.paint_msg(msg))
         self.lover.got_dump()
         self.lover = None
 
     def got_dump(self):
-        msg = self.name + " 很伤心，5555"
+        msg = str(self) + " 很伤心，5555"
         print(Person.paint_msg(msg))
         self.lover = None
 

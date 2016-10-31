@@ -9,8 +9,11 @@ sys.path.append(ROOT_DIR)
 # print(ROOT_DIR)
 # print(APP_DIR)
 from day08.FtpClient.ftpclient import FtpClient
+
 if __name__ == '__main__':
-    f = FtpClient()
-    f.connect('127.0.0.1', 6969)
-    f.conn.send(b'ls')
+    while True:
+        f = FtpClient()
+        f.connect('127.0.0.1', 6969)
+        if f.auth():
+            f.ui()
 

@@ -48,27 +48,27 @@ class Ftp(object):
         确认后，再接收原始数据
         :return:
         """
-        raw_data = self.conn.recv(1024)
-        if not raw_data:
-            return False
-        return raw_data
-        # if not self.conn:
-        #     raise Exception("当前没有连接")
-        # # 接收md5和长度
         # raw_data = self.conn.recv(1024)
         # if not raw_data:
         #     return False
-        # desc = raw_data.decode('utf8')
-        # obj_hash = desc.split('|')[0]
-        # obj_size = desc.split('|')[1]
-        # self.conn.send(b'ACK')
-        # received_size = 0
-        # received_data = b''
-        # while received_size < obj_size:
-        #     tmp_data = self.conn.recv(1024)
-        #     received_data += tmp_data
-        #     received_size += len(tmp_data)
-        # return received_data
+        # return raw_data
+        if not self.conn:
+            raise Exception("当前没有连接")
+        # 接收md5和长度
+        raw_data = self.conn.recv(1024)
+        if not raw_data:
+            raise Exception("连接中断")
+        desc = raw_data.decode('utf8')
+        obj_hash = desc.split('|')[0]
+        obj_size = int(desc.split('|')[1])
+        self.conn.send(b'ACK')
+        received_size = 0
+        received_data = b''
+        while received_size < obj_size:
+            tmp_data = self.conn.recv(1024)
+            received_data += tmp_data
+            received_size += len(tmp_data)
+        return received_data
 
 
 

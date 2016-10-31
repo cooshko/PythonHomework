@@ -32,7 +32,7 @@ class FtpServer(Ftp):
             # 保持服务器活动
             self.conn, self.fromip = self.sock.accept()
             print("%s:%s 已连接..." % (self.fromip[0], self.fromip[1]))
-            self.conn.send(b'NEED AUTH')
+            self.send(b'NEED AUTH')
             while True:
                 try:
                     if not self.current_user:
@@ -43,7 +43,7 @@ class FtpServer(Ftp):
                     else:
                         # 用户已经登录，侦听用户指令
                         cmd_str = self.recv().decode('utf8')
-                        cmd = cmd_str.split(maxsplit=1)[0]
+                        cmd = cmd_str.split(maxsplit=1)[0].lower()
                         args = cmd_str.replace(cmd, '').lstrip()
                         # 使用反射调用方法
                         if hasattr(self, cmd):
@@ -51,24 +51,24 @@ class FtpServer(Ftp):
                             res = func(args)
                         else:
                             res = b'unknown command'
-                        self.conn.send(res)
+                        self.send(res)
                 except Exception as e:
-                    print(e)
-                    print('%s 已经断开' % self.fromip[0])
+                    print('%s 已经断开' % self.current_user)
                     self.current_user = None
+                    self.conn.close()
                     break
 
     def auth(self):
-        raw_data = self.conn.recv(1024)
+        raw_data = self.recv()
         auth_msg = str(raw_data, encoding='utf8')
         username = auth_msg.split(':')[0]
         with open(FtpServer.DB_FILE) as fh:
             res = auth_msg in fh.read()
         if res:
             self.pwd = '.'
-            self.conn.send(b'OKAY')
+            self.send(b'OKAY')
         else:
-            self.conn.send(b'AUTH FAILED')
+            self.send(b'AUTH FAILED')
         return username if res else False
 
     def ls(self, relate_path):
@@ -111,7 +111,7 @@ class FtpServer(Ftp):
             ret = "目录名称不能为空".encode('utf8')
             return ret
         full_path = os.path.abspath(os.path.join(FtpServer.HOME_DIR, self.current_user, self.pwd, dirname))
-        print(full_path)
+        # print(full_path)
         if os.path.isdir(full_path):
             ret = "目录已存在，不能重复创建".encode('utf8')
         else:
@@ -126,7 +126,7 @@ class FtpServer(Ftp):
         :param fpath:
         :return:
         """
-        if not self.dir_accessable(fpath):
+        if not self.accessable(fpath):
             ret = "你只能访问自己的目录".encode('utf8')
             return ret
         full_path = os.path.abspath(os.path.join(FtpServer.HOME_DIR, self.current_user, self.pwd, fpath))
@@ -140,13 +140,41 @@ class FtpServer(Ftp):
             ret = b"DONE"
         return ret
 
-    def get(self, fpath):
-        pass
+    def get(self, filename):
+        # print(filename)
+        if not self.accessable(filename):
+            ret = "NO|你只能访问自己的目录".encode('utf8')
+            return ret
+        full_path = os.path.abspath(os.path.join(FtpServer.HOME_DIR, self.current_user, self.pwd, filename))
+        # 检查文件是否存在
+        if os.path.isfile(full_path):
+            filesize = os.path.getsize(full_path)
+            self.send(bytes("OK|%s|%d" % (filename, filesize), encoding='utf8'))
+            if self.recv() == b'START':
+                with open(full_path, 'rb') as fh:
+                    filedata = fh.read()
+                return filedata
+        else:
+            ret = "NO|文件不存在".encode('utf8')
+            return ret
 
-    def put(self, fname, fsize):
-        pass
+    def put(self, args):    # 收到的格式应该是filename filesize
+        filesize = int(args.split()[-1])
+        filename = args.replace(str(filesize), '').strip()
+        if not self.accessable(filename):
+            ret = "NO|你只能访问自己的目录".encode('utf8')
+            return ret
 
-    def dir_accessable(self, rpath):
+        full_path = os.path.abspath(os.path.join(FtpServer.HOME_DIR, self.current_user, self.pwd, filename))
+        received_data = b''
+        self.send(b'START')
+        while len(received_data) < filesize:
+            received_data += self.recv()
+        with open(full_path, 'wb') as fh:
+            fh.write(received_data)
+        return b'DONE'
+
+    def accessable(self, rpath):
         full_path = os.path.abspath(os.path.join(FtpServer.HOME_DIR, self.current_user, self.pwd, rpath))
         return os.path.join(FtpServer.HOME_DIR, self.current_user) in full_path
 

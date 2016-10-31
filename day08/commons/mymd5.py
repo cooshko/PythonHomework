@@ -7,10 +7,11 @@ import hashlib
 
 class MyMD5(object):
     @staticmethod
-    def encrypt(string: str):
+    def encrypt(bstring: bytes):
         m = hashlib.md5()
-        m.update(string.encode('utf-8'))
+        m.update(bstring)
         return m.hexdigest()
 
 if __name__ == '__main__':
-    print(MyMD5.encrypt('123'))
+    print(MyMD5.encrypt(b'123'))
+    print(MyMD5.encrypt(b'123'))

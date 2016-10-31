@@ -5,12 +5,11 @@
 import socket
 import time
 import datetime
-
+import os
+APP_DIR =
 
 class FtpServer(object):
     def __init__(self):
-        self.sock = socket.socket()
-        self.conn = None
         self.fromip = None
 
     def start(self, ip, port):

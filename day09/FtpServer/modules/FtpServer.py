@@ -14,43 +14,6 @@ class FtpServer(socketserver.BaseRequestHandler):
         self.user_quota = 0
         self.pwd = "."
         self.home = "."
-        super().__init__(request, client_address, server)
-
-    def handle(self):
-        """
-        处理请求的方法
-        :return:
-        """
-        conn = self.request
-        while True:
-            if not self.__login():
-                # 检查是否通过验证，否的话直接进入下一轮
-                continue
-            bdata = conn.recv(1024)     # 接收客户端的指令消息
-            if len(bdata) == 0:
-                self.__log("{username:s}已经断开".format(username=self.current_user))
-                break
-            cmd_str = bdata.decode().strip()
-            cmd = cmd_str.split(maxsplit=1)[0]
-            args = cmd_str.replace(cmd, "").lstrip()
-            if hasattr(self, "cmd_" + cmd):
-                func = getattr(self, "cmd_" + cmd)
-                func(args)
-            else:
-                self.send_once("NO|该指令不存在".encode())
-
-    def setup(self):
-        # connect_msg = "{client_ip:s}已连接".format(client_ip=self.client_address[0])
-        # self.__log(connect_msg)
-        pass
-
-    def __log(self, msg, level=logging.INFO):
-        """
-        记录访问日志
-        :param msg:
-        :param level:
-        :return:
-        """
         log_path = os.path.join(FtpServer.ROOT_DIR, 'log', 'access.log')
         formatter = logging.Formatter(
             fmt="%(asctime)s - %(levelname)s - %(message)s",
@@ -63,15 +26,51 @@ class FtpServer(socketserver.BaseRequestHandler):
         ch.setLevel(logging.INFO)
         ch.setFormatter(formatter)
         # 设定logger，FTP-LOG是这个logger的name
-        logger = logging.getLogger('FTP-LOG')
+        self.logger = logging.getLogger('FTP-LOG')
         # 设定全局的日志级别
-        logger.setLevel(level)
+        self.logger.setLevel(logging.INFO)
         # 将handlers注册到logger去
-        logger.addHandler(fh)
-        logger.addHandler(ch)
+        self.logger.addHandler(fh)
+        self.logger.addHandler(ch)
+        super().__init__(request, client_address, server)
+
+    def handle(self):
+        """
+        处理请求的方法
+        :return:
+        """
+        conn = self.request
+        while True:
+            try:
+                if not self.__login():
+                    # 检查是否通过验证，否的话直接进入下一轮
+                    continue
+                bdata = conn.recv(1024)     # 接收客户端的指令消息
+                if len(bdata) == 0:
+                    self.__log("{username:s}已经断开".format(username=self.current_user))
+                    break
+                cmd_str = bdata.decode().strip()
+                cmd = cmd_str.split(maxsplit=1)[0]
+                args = cmd_str.replace(cmd, "").lstrip()
+                if hasattr(self, "cmd_" + cmd):
+                    func = getattr(self, "cmd_" + cmd)
+                    func(args)
+                else:
+                    self.send_once("NO|该指令不存在".encode())
+            except Exception as e:
+                self.__log("{username:s}已经断开".format(username=self.current_user))
+                break
+
+    def __log(self, msg, level=logging.INFO):
+        """
+        记录访问日志
+        :param msg:
+        :param level:
+        :return:
+        """
         # 调用
         msg = "{ip:s}:{port:d} ".format(ip=self.client_address[0], port=self.client_address[1]) + msg
-        logger.info(msg)
+        self.logger.info(msg)
 
     def __login(self):
         """
@@ -226,7 +225,31 @@ class FtpServer(socketserver.BaseRequestHandler):
         删除目录或者文件
         :return:
         """
-        pass
+        full_path = self.check_access(args)
+        if not full_path:
+            return False
+        if os.path.isfile(full_path):
+            os.remove(full_path)
+            msg = "OKAY|DONE"
+            self.__log("{username:s}删除了文件{file:s}".format(username=self.current_user, file=full_path))
+        elif os.path.isdir(full_path):
+            import shutil
+            shutil.rmtree(full_path)
+            msg = "OKAY|DONE"
+        else:
+            msg = "NO|路径不存在"
+        self.send_once(msg.encode())
+
+    def cmd_du(self, args):
+        """
+        获取当前用户的配额信息
+        :param args:
+        :return:
+        """
+        used_quota = self.__used_quota()
+        remain_quota = self.user_quota - used_quota if self.user_quota - used_quota > 0 else 0
+        msg = "OKAY|你的配额是%d，已使用%d，剩余%d" % (self.user_quota, used_quota, remain_quota)
+        self.send_once(msg.encode())
 
     def cmd_get(self, args):
         """
@@ -235,7 +258,7 @@ class FtpServer(socketserver.BaseRequestHandler):
         :return:
         """
         filename = re.search(r'.*"(.*)".*', args).group(1)  # 要获取的文件名
-        start_position = int(re.search(r'.*from (\d)$', args).group(1))    # 断点续传的起始位
+        start_position = int(re.search(r'.*from (\d+)$', args).group(1))    # 断点续传的起始位
         full_path = self.check_access(filename)     # 检查是否允许访问并返回绝对路径
         if not full_path:
             # 如果不允许访问则返回
@@ -247,20 +270,27 @@ class FtpServer(socketserver.BaseRequestHandler):
             sent_size = 0    # 已发送的字节数
             m = hashlib.md5()
             self.request.send(("OKAY|" + str(total_size)).encode())     # 发送确认和即将发送的大小
-            self.request.recv(1024)     # 获取客户端的开始信号
-            with open(full_path, 'rb') as fh:
-                fh.seek(start_position)     # 根据断点定位文件
-                while total_size - sent_size > 1024:   # 当已发送的字节数小于要发送的总字节数时
-                    data = fh.read(1024)    # 读1024个字节
-                    self.request.send(data) # 发送
-                    sent_size += len(data)
-                    m.update(data)
-                else:
-                    data = fh.read(total_size - sent_size)  # 读1024个字节
-                    self.request.send(data)  # 发送
-                    sent_size += len(data)
-                    m.update(data)
-            self.request.send(m.hexdigest().encode())
+            signal = self.request.recv(1024)     # 获取客户端的开始信号
+            if signal == b'START':
+                with open(full_path, 'rb') as fh:
+                    fh.seek(start_position)     # 根据断点定位文件
+                    end_flag = False
+                    count = 0
+                    while not end_flag:
+                        count += 1
+                        if total_size - sent_size > 1024:
+                            buff_size = 1024
+                        else:
+                            buff_size = total_size - sent_size
+                            end_flag = True
+                        data = fh.read(buff_size)  # 读1024个字节
+                        #print(data)
+                        self.request.send(data)  # 发送
+                        sent_size += len(data)
+                        m.update(data)
+                        #print(count, len(data))
+                self.request.send(m.hexdigest().encode())
+                self.__log("{username:s}下载了文件{file:s}".format(username=self.current_user, file=full_path))
 
     def cmd_put(self, args):
         """
@@ -268,6 +298,45 @@ class FtpServer(socketserver.BaseRequestHandler):
         :param args:
         :return:
         """
+        filename = re.search(r'"(.*)".*', args).group(1)
+        total_size = int(re.search(r'".*" (\d+)', args).group(1))
+        full_path = self.check_access(filename)  # 检查是否允许访问并返回绝对路径
+        if not full_path:
+            # 如果不允许访问则返回
+            return False
+        tmp_file = full_path + ".tmp"
+        start_position = 0
+        if os.path.isfile(tmp_file):
+            start_position = os.path.getsize(tmp_file)
+            total_size -= start_position
+        # 检查配额
+        used_quota = self.__used_quota()
+        if self.user_quota - used_quota < total_size:
+            msg = "NO|你的磁盘配额不足"
+            self.request.send(msg.encode())
+            return
+        # 通过所有检查
+        msg = "OKAY|%d" % start_position
+        self.request.send(msg.encode())
+        end_flag = False
+        received_size = 0
+        m = hashlib.md5()
+        with open(tmp_file, 'ab') as fh:
+            while not end_flag:
+                if total_size - received_size > 1024:
+                    buff_size = 1024
+                else:
+                    buff_size = total_size - received_size
+                    end_flag = True
+                data = self.request.recv(buff_size)
+                fh.write(data)
+                received_size += len(data)
+                m.update(data)
+        self.request.send(m.hexdigest().encode())
+        if os.path.isfile(full_path):
+            os.remove(full_path)
+        os.rename(tmp_file, full_path)
+        self.__log("{username:s}上传了文件{file:s}".format(username=self.current_user, file=full_path))
 
 if __name__ == '__main__':
     myserver = socketserver.ThreadingTCPServer(("0.0.0.0", 9999), FtpServer)

@@ -111,7 +111,7 @@ class Mfm(MyTransMixIn):
 OPTIONS:
 --list  查看主机列表
 --groups 查看组
--H IP:PORT[,IP:PORT] <"command"> 对指定IP主机执行命令
+-H IP[,IP] <"command"> 对指定IP主机执行命令
 -G GROUPNAME <"command"> 对指定组的所有主机执行命令
 
 COMMANDS:

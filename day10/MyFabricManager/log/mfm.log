@@ -1,0 +1,52 @@
+2016-11-08 10:51:47 - ERROR - 127.0.0.1:9999 [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+2016-11-08 10:52:40 - ERROR - 127.0.0.1:9999 not enough values to unpack (expected 2, got 1)
+2016-11-08 10:53:35 - ERROR - 127.0.0.1:9999 [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+2016-11-08 10:54:02 - ERROR - 127.0.0.1:9999 [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 10:54:19 - ERROR - 127.0.0.1:9999 not enough values to unpack (expected 2, got 1)
+2016-11-08 10:55:46 - ERROR - 127.0.0.1:9999 not enough values to unpack (expected 2, got 1)
+2016-11-08 10:56:23 - ERROR - 127.0.0.1:9999 [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+2016-11-08 10:56:42 - ERROR - 127.0.0.1:9999 not enough values to unpack (expected 2, got 1)
+2016-11-08 11:01:07 - ERROR - 127.0.0.1:9999 [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 11:02:17 - ERROR - 127.0.0.1:9999 [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 11:10:26 - ERROR - 127.0.0.1:9999 'utf-8' codec can't decode byte 0xc7 in position 1: invalid continuation byte
+2016-11-08 11:11:57 - ERROR - 127.0.0.1:9999 'utf-8' codec can't decode byte 0xc7 in position 1: invalid continuation byte
+2016-11-08 11:35:45 - ERROR - 127.0.0.1:9999 连接中断
+2016-11-08 12:52:14 - ERROR - 127.0.0.1:9999 [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+2016-11-08 14:55:41 - ERROR - [127.0.0.1:9999] [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 14:57:51 - ERROR - [127.0.0.1:9999] [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 14:58:30 - ERROR - [127.0.0.1:9999] [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 14:59:56 - ERROR - [127.0.0.1:9999] [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 15:02:08 - ERROR - [127.0.0.1:9999] 发送的数据必须为bytes类型
+2016-11-08 15:03:12 - ERROR - [127.0.0.1:9999] list index out of range
+2016-11-08 15:05:20 - ERROR - [127.0.0.1:9999] [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 15:05:27 - ERROR - [127.0.0.1:9999] list index out of range
+2016-11-08 15:07:12 - ERROR - [127.0.0.1:9999] list index out of range
+2016-11-08 15:08:16 - ERROR - [127.0.0.1:9999] [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2016-11-08 15:08:20 - ERROR - [127.0.0.1:9999] [WinError 10061] 由于目标计算机积极拒绝，无法连接。
+2016-11-08 15:09:15 - ERROR - [127.0.0.1:9999] a bytes-like object is required, not 'str'
+2016-11-08 15:09:53 - ERROR - [127.0.0.1:9999] not enough values to unpack (expected 2, got 1)
+2016-11-08 15:12:32 - ERROR - [127.0.0.1:9999] not enough values to unpack (expected 2, got 1)
+2016-11-08 15:18:45 - ERROR - [127.0.0.1:9999] not enough values to unpack (expected 2, got 1)
+2016-11-08 15:20:06 - ERROR - [127.0.0.1:9999] not enough values to unpack (expected 2, got 1)
+2016-11-08 15:21:14 - ERROR - [127.0.0.1:9999] not enough values to unpack (expected 2, got 1)
+2016-11-08 15:22:18 - ERROR - [127.0.0.1:9999] not enough values to unpack (expected 2, got 1)
+2016-11-08 15:28:43 - INFO - 尝试发送文件：F:\香港空运改造进度.xlsx
+2016-11-08 15:29:40 - INFO - 尝试发送文件：F:\香港空运改造进度.xlsx
+2016-11-08 15:31:49 - INFO - 尝试发送文件：F:\香港空运改造进度.xlsx
+2016-11-08 15:33:31 - INFO - 尝试发送文件：F:\香港空运改造进度.xlsx
+2016-11-08 15:34:45 - INFO - 尝试发送文件：F:\香港空运改造进度.xlsx
+2016-11-08 15:35:16 - INFO - 尝试发送文件：F:\香港空运改造进度.xlsx
+2016-11-08 15:36:22 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:37:01 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:38:10 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:44:07 - ERROR - [127.0.0.1:9999] [WinError 10053] 您的主机中的软件中止了一个已建立的连接。
+2016-11-08 15:46:29 - ERROR - [127.0.0.1:9999] [WinError 10053] 您的主机中的软件中止了一个已建立的连接。
+2016-11-08 15:48:29 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:48:45 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:48:56 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:55:07 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:56:24 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:58:35 - INFO - 尝试发送文件：F:\README.HTM
+2016-11-08 15:58:35 - INFO - 成功
+2016-11-08 15:59:08 - INFO - 尝试发送文件：F:\香港空运改造进度.xlsx
+2016-11-08 15:59:08 - INFO - 成功

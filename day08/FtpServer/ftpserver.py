@@ -60,7 +60,7 @@ class FtpServer(Ftp):
 
     def auth(self):
         raw_data = self.recv()
-        auth_msg = str(raw_data, encoding='utf8')
+        auth_msg = str(raw_data, encoding='utf8')   # username:md5
         username = auth_msg.split(':')[0]
         with open(FtpServer.DB_FILE) as fh:
             res = auth_msg in fh.read()

@@ -2,16 +2,12 @@
 # -*- coding: utf-8 -*-
 # @Author  : Coosh
 # @File    : test.py
+import re
 host_list = []
 group_dict = dict()
 with open("hosts.cfg") as f:
     for line in f:
-        hostname, ip_port, group = line.split()
-        ip = ip_port.split(":")[0]
-        port = ip_port.split(":")[1]
-        host = {'hostname': hostname, 'ip': ip, 'port': port}
-        if group in group_dict:
-            group_dict[group].append(host)
-        else:
-            group_dict[group] = [host, ]
-        host_list.append(host)
+        hostname, url, group = line.split()
+        username, password, ip, port = re.findall(r"(.+):(.*)@(.+):(\d+)", url)[0]
+        print(username, password, ip, port)
+

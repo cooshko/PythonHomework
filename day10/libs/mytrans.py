@@ -42,6 +42,7 @@ class MyTransMixIn(object):
     def send_file(sock, local_file):
         m = hashlib.md5()
         success = False
+        local_file = local_file.strip()
         description = ""
         if local_file:
             if os.path.isfile(local_file):
@@ -74,6 +75,7 @@ class MyTransMixIn(object):
                     description = reason
             else:
                 description = "该本地文件不存在"
+                sock.sendall(("NO|" + description).encode())
         else:
             description = "请提供本地文件"
         return success, description
@@ -82,6 +84,9 @@ class MyTransMixIn(object):
     def recv_file(sock, tmp_dir="."):
         m = hashlib.md5()
         file_info = sock.recv(1024).decode()
+        if file_info.startswith("NO|"):
+            reason = file_info.replace("NO|", "")
+            return False, reason
         # 对应cmd_msg = ("{filename:s}|{size:d}".format(filename=filename, size=filesize)).encode()
         filename = file_info.split("|")[0]
         filesize = int(file_info.split("|")[1])
@@ -111,6 +116,8 @@ class MyTransMixIn(object):
             if os.path.isfile(file_abs_path):
                 os.remove(file_abs_path)
             os.rename(tmp_file_abs_path, file_abs_path)
+            return True, file_abs_path
         else:
             # 接收出错，则删除临时文件
             os.remove(tmp_file_abs_path)
+            return False, "接收文件出错"

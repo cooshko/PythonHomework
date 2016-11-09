@@ -73,3 +73,4 @@
 2016-11-09 13:40:52 - INFO - [192.168.5.41:9991] 成功！文件保存到 E:\PycharmProjects\PythonHomework\day10\MyFabricManager\data\192.168.5.41\ip.txt
 2016-11-09 13:40:52 - INFO - [192.168.5.142:9993] 成功！文件保存到 E:\PycharmProjects\PythonHomework\day10\MyFabricManager\data\192.168.5.142\ip.txt
 2016-11-09 13:40:52 - INFO - [192.168.5.138:9992] 成功！文件保存到 E:\PycharmProjects\PythonHomework\day10\MyFabricManager\data\192.168.5.138\ip.txt
+2016-11-09 13:49:43 - ERROR - [192.168.5.41:9991] [WinError 10061] 由于目标计算机积极拒绝，无法连接。

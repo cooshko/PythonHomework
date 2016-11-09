@@ -1,0 +1,97 @@
+===START===
+[192.168.5.138:9992]  >>> ifconfig
+eth0      Link encap:Ethernet  HWaddr 00:0C:29:6A:AF:94  
+          inet addr:192.168.5.138  Bcast:192.168.5.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:3671978 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:26682 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:296565281 (282.8 MiB)  TX bytes:3712805 (3.5 MiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:12 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:12 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:840 (840.0 b)  TX bytes:840 (840.0 b)
+
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> ifconfig|grep 192.168
+          inet addr:192.168.5.138  Bcast:192.168.5.255  Mask:255.255.255.0
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> df -h
+Filesystem                    Size  Used Avail Use% Mounted on
+/dev/mapper/VolGroup-lv_root   14G  4.9G  8.2G  38% /
+tmpfs                         499M     0  499M   0% /dev/shm
+/dev/sda1                     485M   34M  426M   8% /boot
+/dev/sr0                      4.2G  4.2G     0 100% /media/CentOS
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> hostname
+Lab2.jscan
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> hostname
+Lab2.jscan
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> hostname
+Lab2.jscan
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> put F:\README.HTM
+成功！
+===END===
+===START===
+[192.168.5.138:9992]  >>> get /tmp/ip.txt
+成功！文件保存到 E:\PycharmProjects\PythonHomework\day10\MyFabricManager\data\192.168.5.138\ip.txt
+===END===
+===START===
+[192.168.5.138:9992]  >>> ifconfig
+eth0      Link encap:Ethernet  HWaddr 00:0C:29:6A:AF:94  
+          inet addr:192.168.5.138  Bcast:192.168.5.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:3673890 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:26836 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:296703981 (282.9 MiB)  TX bytes:3727625 (3.5 MiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:12 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:12 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:840 (840.0 b)  TX bytes:840 (840.0 b)
+
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> ifconfig
+eth0      Link encap:Ethernet  HWaddr 00:0C:29:6A:AF:94  
+          inet addr:192.168.5.138  Bcast:192.168.5.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:3674005 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:26856 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:296712113 (282.9 MiB)  TX bytes:3730349 (3.5 MiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:12 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:12 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:840 (840.0 b)  TX bytes:840 (840.0 b)
+
+
+===END===

@@ -1,0 +1,10 @@
+===START===
+[192.168.5.37:9994]  >>> hostname
+ntp1.jscan
+
+===END===
+===START===
+[192.168.5.37:9994]  >>> hostname
+ntp1.jscan
+
+===END===

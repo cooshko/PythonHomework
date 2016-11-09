@@ -116,7 +116,6 @@ class Mfm(MyTransMixIn):
                 self.output_file(node_ip, whole_msg)
         except Exception as e:
             self.logger.error(ip_info + str(e))
-            raise
         finally:
             sock.close()
 

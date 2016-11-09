@@ -221,7 +221,7 @@ put LOCAL-FILE-PATH  将本地文件上传到远程主机
             else:
                 print("没有这个组，请使用 --groups 选项查看")
         else:
-            pass
+            self.display_help()
 
 if __name__ == '__main__':
         mfm = Mfm(isdebug=True)

@@ -95,3 +95,18 @@ lo        Link encap:Local Loopback
 
 
 ===END===
+===START===
+[192.168.5.138:9992]  >>> hostname
+Lab2.jscan
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> uname
+Linux
+
+===END===
+===START===
+[192.168.5.138:9992]  >>> uname -a
+Linux Lab2.jscan 2.6.32-431.el6.x86_64 #1 SMP Fri Nov 22 03:15:09 UTC 2013 x86_64 x86_64 x86_64 GNU/Linux
+
+===END===

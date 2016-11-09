@@ -8,3 +8,18 @@ ntp1.jscan
 ntp1.jscan
 
 ===END===
+===START===
+[192.168.5.37:9994]  >>> hostname
+ntp1.jscan
+
+===END===
+===START===
+[192.168.5.37:9994]  >>> uname
+Linux
+
+===END===
+===START===
+[192.168.5.37:9994]  >>> uname -a
+Linux ntp1.jscan 2.6.32-279.el6.i686 #1 SMP Fri Jun 22 10:59:55 UTC 2012 i686 i686 i386 GNU/Linux
+
+===END===

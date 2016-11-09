@@ -48,6 +48,7 @@ class Mfn(MyTransMixIn):
             return False
 
     def run(self):
+        # 监听指定端口
         self.sock.bind((self.listen_ip, self.listen_port))
         self.sock.listen(5)
         self.logger.info("服务启动")

@@ -14,6 +14,18 @@ get REMOTE-FILE-PATH 尝试获取远程主机指定路径的文件
 put LOCAL-FILE-PATH  将本地文件上传到远程主机
 其他指令直接发往远程主机上执行
 ```
+多线程部分代码
+```
+for host in self.group_dict[group_name]:
+    t = threading.Thread(target=self.commander, kwargs={'node_ip': host['ip'],
+                                                        'node_port': host['port'],
+                                                        'node_username': host['username'],
+                                                        'node_password': host['password'],
+                                                        'command': command,
+                                                        'output_file': True
+                                                        })
+t.start()
+```
 验证失败
 ```
 Connected to pydev debugger (build 162.1628.8)

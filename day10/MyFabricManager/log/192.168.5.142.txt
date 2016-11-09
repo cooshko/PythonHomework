@@ -117,3 +117,8 @@ Linux
 Linux Lab3.jscan 2.6.32-573.22.1.el6.x86_64 #1 SMP Wed Mar 23 03:35:39 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
 
 ===END===
+===START===
+[192.168.5.142:9993]  >>> uname -a
+Linux Lab3.jscan 2.6.32-573.22.1.el6.x86_64 #1 SMP Wed Mar 23 03:35:39 UTC 2016 x86_64 x86_64 x86_64 GNU/Linux
+
+===END===

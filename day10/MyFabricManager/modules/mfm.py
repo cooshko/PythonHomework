@@ -120,6 +120,7 @@ class Mfm(MyTransMixIn):
             sock.close()
 
     def output_file(self, ip, msg):
+        # 把回显结果写到对应的ip文件中
         of = os.path.join(Mfm.LOG_DIR, ip + '.txt')
         with open(of, 'a', encoding='utf-8') as f:
             f.write(msg)
@@ -151,11 +152,13 @@ class Mfm(MyTransMixIn):
                 self.host_list.append(host)
 
     def list_hosts(self):
+        # 显示所有主机信息
         print("总共%d个主机" % len(self.host_list))
         for host in self.host_list:
             print("%10s %s:%d %s %s" % (host["hostname"], host['ip'], host['port'], host['username'], host['password']))
 
     def display_groups(self):
+        # 显示组的信息
         print("共%d组" % len(self.group_dict))
         for group_name in self.group_dict:
             print(group_name, "组")
@@ -190,6 +193,7 @@ put LOCAL-FILE-PATH  将本地文件上传到远程主机
         elif "--groups" in sys.argv:
             self.display_groups()
         elif "-H" in sys.argv:
+            # 对全部主机执行指令
             self.load_config()
             position = sys.argv.index("-H")
             command = sys.argv[position+1]
@@ -204,6 +208,7 @@ put LOCAL-FILE-PATH  将本地文件上传到远程主机
                 t.start()
 
         elif "-G" in sys.argv:
+            # 仅对组成员执行指令
             self.load_config()
             position = sys.argv.index("-G")
             group_name = sys.argv[position+1].strip()

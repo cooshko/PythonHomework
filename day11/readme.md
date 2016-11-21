@@ -5,14 +5,15 @@
 3. server端接受client端的命令执行结果，并处理，
 4. 可选择指定主机或者主机组
 
-> * 本程序满足以上需求，但rabbitmq需要自行安装并配置。而本程序的rabbitmq的ip地址和认证，请在commons目录中的rabbit.py中修改
+> * rabbitmq需要自行安装并配置（下面有简单的配置）
+> * 而本程序的rabbitmq的ip地址和认证，请在commons/conf/rabbit.conf目录中修改
 > * 程序的入口均在各自的bin目录下的main.py
 > * 由于commons为公共类库，所以使用时务必要带上这个目录
 > * 管理端使用主线程来接收指令并推送，子线程来打印结果
 
 特别说明：由于视频课程中没有讲述rabbitmq的安装和配置，所以在使用时，如果不是本机访问rabbitmq，可能会认证失败，这是因为rabbitmq默认用户guest是不允许远程访问的，但生产环境中，大多都是远程访问，因此这里附带上简单的配置（共5步）
 
-1、使用sudo apt-get install rabbitmq-server即可安装（centos貌似不能yum安装，只能源码安装了）
+1、使用apt-get install rabbitmq-server即可安装（centos貌似不能yum安装，只能源码安装了）
 
 2、开启web管理页面（可选）
 rabbitmq-plugins enable rabbitmq_management

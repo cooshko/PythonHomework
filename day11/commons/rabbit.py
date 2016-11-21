@@ -3,7 +3,7 @@
 # @Author  : Coosh
 # @File    : rabbit.py
 
-import pika
+import pika, configparser, os
 
 
 class Rabbit(object):
@@ -11,8 +11,15 @@ class Rabbit(object):
         # 建立连接、生成队列名称，声明exchange
         self.tags = tags
         self.exchange = exchange
-        cred = pika.PlainCredentials("coosh", "coosh")
-        self.conn = pika.BlockingConnection(pika.ConnectionParameters(host="192.168.199.196", credentials=cred))
+        cp = configparser.ConfigParser()
+        conf_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "conf", "rabbit.conf")
+        cp.read(conf_file)
+        self.ip = cp['rabbit']['ip']
+        self.port = int(cp['rabbit']['port'])
+        self.username = cp['rabbit']['username']
+        self.password = cp['rabbit']['password']
+        cred = pika.PlainCredentials(self.username, self.password)
+        self.conn = pika.BlockingConnection(pika.ConnectionParameters(host=self.ip, port=self.port, credentials=cred))
         self.channel = self.conn.channel()
         self.channel.basic_qos(prefetch_count=1)
         self.channel.exchange_declare(exchange=self.exchange, type="direct")
@@ -43,3 +50,6 @@ class Rabbit(object):
                                    no_ack=False,  # 确认该消息，ack功能用于防止消息丢失
                                    consumer_callback=callback)  # 收到的数据，使用回调函数去处理，这里使用上方定义的callback函数
         self.channel.start_consuming()
+
+if __name__ == '__main__':
+    rabbit = Rabbit("RPC", ["test", ])

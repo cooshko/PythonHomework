@@ -67,6 +67,14 @@ class Host2Group(Base):
     hgid = Column(Integer, ForeignKey("host_group.id"), primary_key=True)
     __table_args__ = (UniqueConstraint("hid", "hgid", name="_h_hg_uc"),)
 
+
+class User2Host(Base):
+    # 堡垒机用户关联主机
+    __tablename__ = "user2host"
+    uid = Column(Integer, ForeignKey("user.id"), nullable=False)
+    hid = Column(Integer, ForeignKey("host.id"), nullable=False)
+    __table_args__ = (UniqueConstraint("hid", "uid", name="_u_h_uc"),)
+
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
 

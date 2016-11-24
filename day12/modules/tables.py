@@ -51,7 +51,7 @@ class User(Base):
     name = Column(String(64), nullable=False, unique=True)
     password = Column(String(64), nullable=False)
     enable = Column(Boolean, default=True)
-    user_group = relationship("UserGroup", secondary=User2Group.__table__, backref="user")
+    user_group = relationship("UserGroup", secondary=User2Group.__table__, back_populates="user")
 
 
 class UserGroup(Base):
@@ -60,7 +60,7 @@ class UserGroup(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(64), nullable=False, unique=True)
     description = Column(String(255))
-    user = relationship("User", secondary=User2Group.__table__, backref="user_group")
+    user = relationship("User", secondary=User2Group.__table__, back_populates="user_group")
 
 
 class Host2Group(Base):
@@ -89,8 +89,8 @@ class Host(Base):
     name = Column(String(64), nullable=False)
     ip = Column(String(15), nullable=False)
     port = Column(Integer, default=22)
-    host_user = relationship("HostUser", secondary=Host2HostUser.__table__, backref="host")
-    host_group = relationship("HostGroup", secondary=Host2Group.__table__, backref="host")
+    host_user = relationship("HostUser", secondary=Host2HostUser.__table__, back_populates="host")
+    host_group = relationship("HostGroup", secondary=Host2Group.__table__, back_populates="host")
 
 
 class HostGroup(Base):
@@ -99,7 +99,7 @@ class HostGroup(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(64), nullable=False, unique=True)
     description = Column(String(255))
-    host = relationship("Host", secondary=Host2Group.__table__, backref="host_group")
+    host = relationship("Host", secondary=Host2Group.__table__, back_populates="host_group")
 
 
 class HostUser(Base):
@@ -112,7 +112,7 @@ class HostUser(Base):
     auth_user = Column(String(64), nullable=False)
     auth_pass = Column(String(64))
     auth_key = Column(String(255))
-    host = relationship("Host", secondary=Host2HostUser.__table__, backref="host_user")
+    host = relationship("Host", secondary=Host2HostUser.__table__, back_populates="host_user")
 
 
 

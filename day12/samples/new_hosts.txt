@@ -1,0 +1,4 @@
+www-01-nginx 192.168.5.138 22 root 24559982 www
+cache-01-redis 192.168.5.142 22 root 24559982
+db-01-mysql 192.168.108.129 22 coosh 24559982
+www-02-apache 192.168.5.8 22 root 24559982 www

@@ -3,80 +3,75 @@
 # @Author  : Coosh
 # @File    : views.py
 import sys
-from day12.modules.tables import *
-import hashlib
+from day12.modules.baoleiji import Baoleiji
 
 
 class Views(object):
-    @staticmethod
-    def create_user_groups(user_groups: list):  # example: [{group1: name, desc: description}, {group2: name, desc: description}]
-        """
-        创建用户组
-        :param user_groups:
-        :return:
-        """
-        whole_list = []
-        for g in user_groups:
-            whole_list.append(UserGroup(name=g['name'], description=g['description']))
-        session.add_all(whole_list)     # 使用add_all减少数据库交换
-        session.commit()
+    baoleiji = Baoleiji()
 
     @staticmethod
-    def create_host_groups(host_groups: list):  # example参考上面
+    def create_user_groups_from_console():
+        """
+        创建堡垒机用户组
+        :return:
+        """
+        filepath = r"../samples/new_user_groups.txt"
+        with open(filepath, encoding="utf8") as fh:
+            li = []
+            for line in fh:
+                try:
+                    name, desc = line.strip().split()
+                except:
+                    name = line.strip()
+                    desc = ""
+                li.append({
+                    "name": name,
+                    "description": desc
+                })
+        Views.baoleiji.create_user_groups(li)
+
+    @staticmethod
+    def create_host_groups_from_console():
         """
         创建主机组
-        :param host_groups:
         :return:
         """
-        whole_list = []
-        for g in host_groups:
-            whole_list.append(HostGroup(name=g['name'], description=g['description']))
-        session.add_all(whole_list)  # 使用add_all减少数据库交换
-        session.commit()
+        filepath = r"../samples/new_host_groups.txt"
+        with open(filepath, encoding="utf8") as fh:
+            li = []
+            for line in fh:
+                try:
+                    name, desc = line.strip().split()
+                except:
+                    name = line.strip()
+                    desc = ""
+                li.append({
+                    "name": name,
+                    "description": desc
+                })
+        Views.baoleiji.create_host_groups(li)
 
     @staticmethod
-    def create_user(user_list: list):  # example: [{username1: name, password: plainText}, {username2: name, password: plainText}]
-        whole_list = []
-        for u in user_list:
-            name = u['name'].strip()
-            m = hashlib.md5()
-            m.update(u['password'])
-            passwd_md5 = m.hexdigest()
-            whole_list.append(User(name, passwd_md5))
-        session.add_all(whole_list)
-        session.commit()
+    def create_user_from_console():
+        filepath = r"../samples/new_users.txt"
+        user_list = []
+        with open(filepath, encoding="utf8") as fh:
+            for line in fh:
+                if line.strip():
+                    username = line.split()[0]
+                    password = line.split()[1]
+                    groups = line.split()[2:]
+                    user_list.append(
+                        {
+                            'username': username,
+                            'password': password,
+                            'groups': groups
+                        }
+                    )
+        Baoleiji.create_user(user_list)
 
 
 if __name__ == '__main__':
-    # 创建用户组
-    # filepath = r"../samples/new_user_groups.txt"
-    # with open(filepath) as fh:
-    #     li = []
-    #     for line in fh:
-    #         try:
-    #             name, desc = line.strip().split()
-    #         except:
-    #             name = line.strip()
-    #             desc = ""
-    #         li.append({
-    #             "name": name,
-    #             "description": desc
-    #         })
-    #     Views.create_user_groups(li)
-
-    # 创建主机组
-    # filepath = r"../samples/new_host_groups.txt"
-    # with open(filepath, encoding="utf8") as fh:
-    #     li = []
-    #     for line in fh:
-    #         try:
-    #             name, desc = line.strip().split()
-    #         except:
-    #             name = line.strip()
-    #             desc = ""
-    #         li.append({
-    #             "name": name,
-    #             "description": desc
-    #         })
-    #     Views.create_host_groups(li)
-    pass
+    # Views.create_user_groups_from_console()
+    # Views.create_host_groups_from_console()
+    Views.create_user_from_console()

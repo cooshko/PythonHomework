@@ -63,7 +63,7 @@ class UserGroup(Base):
     user = relationship("User", secondary=User2Group.__table__, back_populates="user_group")
 
 
-class Host2Group(Base):
+class Host2HostGroup(Base):
     # 主机关联主机组
     __tablename__ = "host2group"
     hid = Column(Integer, ForeignKey("host.id"), primary_key=True)
@@ -90,7 +90,7 @@ class Host(Base):
     ip = Column(String(15), nullable=False)
     port = Column(Integer, default=22)
     host_user = relationship("HostUser", secondary=Host2HostUser.__table__, back_populates="host")
-    host_group = relationship("HostGroup", secondary=Host2Group.__table__, back_populates="host")
+    host_group = relationship("HostGroup", secondary=Host2HostGroup.__table__, back_populates="host")
 
 
 class HostGroup(Base):
@@ -99,7 +99,7 @@ class HostGroup(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(64), nullable=False, unique=True)
     description = Column(String(255))
-    host = relationship("Host", secondary=Host2Group.__table__, back_populates="host_group")
+    host = relationship("Host", secondary=Host2HostGroup.__table__, back_populates="host_group")
 
 
 class HostUser(Base):

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Author  : Coosh
 # @File    : views.py
-import sys
+import sys, yaml
 from day12.modules.baoleiji import Baoleiji
 
 
@@ -68,10 +68,47 @@ class Views(object):
                             'groups': groups
                         }
                     )
-        Baoleiji.create_user(user_list)
+        Baoleiji.create_users(user_list)
+
+    @staticmethod
+    def create_host_from_sample():
+        filepath = r"../samples/new_hosts.txt"
+        with open(filepath) as fh:
+            var = yaml.load(fh)
+        for group in var:
+            groupname = group['name']
+            group_obj = Baoleiji.load_host_group(groupname)
+            hgid = None
+            if not group_obj:
+                raise Exception(groupname, "不存在，无法继续。")
+            else:
+                hgid = group_obj.id
+            huid_list = []
+            for hu in group['auth_set']:
+                username = hu['user']
+                using_key = True if "key" in hu else False
+                password = hu.get('password', default="")
+                key = hu.get('key', default="")
+                huid = Baoleiji.create_host_user(username, using_key, password, key)
+                huid_list.append(huid)
+            hid_list = []
+            for host in group['hosts']:
+                h = Baoleiji.load_host(host['name'])
+                if h:
+                    hid = h.id
+                else:
+                    hid = Baoleiji.create_host(host['name'], host['ip'], int(host['port']))
+                hid_list.append(hid)
+            if huid_list and hid_list:
+                # 建立主机到认证方法和组的映射
+                for hid in hid_list:
+                    h2hg_obj = Baoleiji.host2hostgroups(hid=hid, hgid=hgid)
+                    for huid in huid_list:
+                        h2hu_obj = Baoleiji.
 
 
 if __name__ == '__main__':
     # Views.create_user_groups_from_console()
     # Views.create_host_groups_from_console()
-    Views.create_user_from_console()
+    # Views.create_user_from_console()
+    Views.create_host_from_sample()

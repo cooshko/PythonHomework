@@ -46,8 +46,7 @@ class Baoleiji(object):
         :return:
         """
         hu_obj = HostUser(auth_user=auth_user, using_key=using_key, auth_pass=auth_pass, auth_key=auth_key)
-        session.add(hu_obj)
-        session.commit()
+        Baoleiji.session_add(hu_obj)
         return hu_obj.id
 
     @staticmethod
@@ -87,8 +86,7 @@ class Baoleiji(object):
             if gid_list:
                 for gid in gid_list:
                     user2group_obj = User2Group(uid=uid, gid=gid)
-                    session.add(user2group_obj)
-                session.commit()
+                    Baoleiji.session_add(user2group_obj)
             else:
                 print(name, "用户已经添加，但没有加入任何的组")
         return ret
@@ -109,21 +107,21 @@ class Baoleiji(object):
             ret = host_exsit.id
         else:
             host_obj = Host(name=hostname, ip=ip, port=port)
-            session.add(host_obj)
-            session.commit()
+            Baoleiji.session_add(host_obj)
             ret = host_obj.id
         return ret
 
     @staticmethod
     def host2hostgroups(hid, hgid):
-        try:
-            h2hg_obj = Host2HostGroup(hid=hid, hgid=hgid)
-            session.add(h2hg_obj)
-            session.commit()
-            return True
-        except Exception:
-            session.rollback()
-            return False
+        """
+        主机加入到主机组
+        :param hid:
+        :param hgid:
+        :return:
+        """
+        h2hg_obj = Host2HostGroup(hid=hid, hgid=hgid)
+        ret = Baoleiji.session_add(h2hg_obj)
+        return ret
 
     @staticmethod
     def host2hostuser(hid, huid):
@@ -133,14 +131,22 @@ class Baoleiji(object):
         :param huid:
         :return:
         """
-        try:
-            h2hu_obj = Host2HostUser(hid=hid, huid=huid)
-            session.add(h2hu_obj)
-            session.commit()
-            return True
-        except Exception:
-            session.rollback()
-            return False
+        h2hu_obj = Host2HostUser(hid=hid, huid=huid)
+        ret = Baoleiji.session_add(h2hu_obj)
+        return ret
+
+    @staticmethod
+    def user2host2hostuser(uid, hid, huid):
+        """
+        建立堡垒机用户-主机-主机用户的管理
+        :param uid:
+        :param hid:
+        :param huid:
+        :return:
+        """
+        obj = User2Host2HostUser(uid=int(uid), hid=int(hid), huid=int(huid))
+        ret = Baoleiji.session_add(obj)
+        return ret
 
     @staticmethod
     def load_user_group(groupname: str):
@@ -149,6 +155,30 @@ class Baoleiji(object):
     @staticmethod
     def load_host_group(groupname: str):
         return session.query(HostGroup).filter(HostGroup.name == groupname).first()
+
+    @staticmethod
+    def session_add(obj):
+        try:
+            session.add(obj)
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            return False
+
+    @staticmethod
+    def load_all_host_groups():
+        groups_obj_list = session.query(HostGroup).all()
+        return list([[
+                         group.id,
+                         group.name,
+                         group.description,
+                         list([[
+                                   host.id,
+                                   host.name,
+                                   list([hu.id, hu.auth_user] for hu in host.host_user)
+                               ]for host in group.host])
+                     ] for group in groups_obj_list])
 
     @staticmethod
     def load_user(username: str):

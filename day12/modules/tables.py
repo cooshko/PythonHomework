@@ -115,33 +115,13 @@ class HostUser(Base):
     host = relationship("Host", secondary=Host2HostUser.__table__, back_populates="host_user")
 
 
-
-
-# class User2Host(Base):
-#     # 堡垒机用户关联主机
-#     __tablename__ = "user2host"
-#     uid = Column(Integer, ForeignKey("user.id"), nullable=False, primary_key=True)
-#     hid = Column(Integer, ForeignKey("host.id"), nullable=False, primary_key=True)
-#     __table_args__ = (UniqueConstraint("hid", "uid", name="_u_h_uc"),)
-
-# class AuthMethod(Base):
-#     # 储存认证方法的表
-#     __tablename__ = "auth_method"
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     using_key = Column(Boolean, default=False)
-#     auth_user = Column(String(64), nullable=False)
-#     auth_pass = Column(String(64))
-#     auth_key = Column(String(255))
-#
-#
-# class UserHostAuth(Base):
-#     # 用户+主机组+主机+认证方法
-#     __tablename__ = "user_host_privileges"
-#     uid = Column(Integer, ForeignKey("user.id"), primary_key=True)
-#     hid = Column(Integer, ForeignKey("host.id"), primary_key=True)
-#     hgid = Column(Integer, ForeignKey("host_group.id"))
-#     mid = Column(Integer, ForeignKey("auth_method.id"), primary_key=True)
-#     __table_args__ = ((UniqueConstraint("uid", "hid", "mid", name="_u_h_m_uc")),)
+class User2Host2HostUser(Base):
+    # 堡垒机用户关联到主机和主机用户
+    __tablename__ = "user2host2host_user"
+    uid = Column(Integer, ForeignKey("user.id"), primary_key=True)
+    hid = Column(Integer, ForeignKey("host.id"), primary_key=True)
+    huid = Column(Integer, ForeignKey("host_user.id"), primary_key=True)
+    __table_args__ = ((UniqueConstraint("uid", "hid", "huid", name="_u_h_hu_uc")),)
 
 
 if __name__ == '__main__':

@@ -108,10 +108,24 @@ class Views(object):
                         h2hu_obj = Baoleiji.host2hostuser(hid, huid)
         return True
 
+    @staticmethod
+    def connect_user_host_hostuser():
+        current_user = {"id":1, "name":"coosh"}
+        menu = Baoleiji.load_all_host_groups()
+        for group in menu:
+            print(group[0], group[2])
+        group_choice = int(input("请输入主机组：").strip())
+        for host in menu[group_choice]:
+            print(host[0], host[1])
+        host_choice = int(input("请输入主机：").strip())
+        for host_user in menu[group_choice][host_choice]:
+            print(host_user[0], host_user[1])
+        host_user_choice = int(input("请输入用户：").strip())
 
 if __name__ == '__main__':
     # Views.create_user_groups_from_console()
     # Views.create_host_groups_from_console()
     # Views.create_user_from_console()
     # Views.create_host_from_sample()
+    Views.connect_user_host_hostuser()
     pass

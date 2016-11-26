@@ -76,7 +76,7 @@ class Views(object):
         with open(filepath) as fh:
             var = yaml.load(fh)
         for group in var:
-            groupname = group['name']
+            groupname = group['groupname']
             group_obj = Baoleiji.load_host_group(groupname)
             hgid = None
             if not group_obj:
@@ -87,8 +87,9 @@ class Views(object):
             for hu in group['auth_set']:
                 username = hu['user']
                 using_key = True if "key" in hu else False
-                password = hu.get('password', default="")
-                key = hu.get('key', default="")
+                password = str(hu.get("password", ""))
+
+                key = hu.get('key', "")
                 huid = Baoleiji.create_host_user(username, using_key, password, key)
                 huid_list.append(huid)
             hid_list = []
@@ -104,11 +105,13 @@ class Views(object):
                 for hid in hid_list:
                     h2hg_obj = Baoleiji.host2hostgroups(hid=hid, hgid=hgid)
                     for huid in huid_list:
-                        h2hu_obj = Baoleiji.
+                        h2hu_obj = Baoleiji.host2hostuser(hid, huid)
+        return True
 
 
 if __name__ == '__main__':
     # Views.create_user_groups_from_console()
     # Views.create_host_groups_from_console()
     # Views.create_user_from_console()
-    Views.create_host_from_sample()
+    # Views.create_host_from_sample()
+    pass

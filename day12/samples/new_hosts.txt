@@ -1,25 +1,23 @@
--   group:
-        name : www
-        auth_set :
-            -   user : nginx
-                password : 789
-        hosts:
-            -   name: ubuntu
-                ip : 192.168.1.55
-                port : 22
-            -   name: www-mysql-1
-                ip : 192.168.5.102
-                port : 65222
+-   groupname: www
+    auth_set :
+        -   user : nginx
+            password : 789
+    hosts:
+        -   name: ubuntu
+            ip : 192.168.1.55
+            port : 22
+        -   name: www-mysql-1
+            ip : 192.168.5.102
+            port : 65222
 
--   group:
-        name: mysql
-        auth_set:
-            -   user : mysql
-                password : 123
-        hosts:
-            -   name: db-mysql-1
-                ip : 192.168.5.101
-                port : 22
-            -   name: www-mysql-1
-                ip : 192.168.5.102
-                port : 65222
+-   groupname: db
+    auth_set:
+        -   user : mysql
+            password : 123
+    hosts:
+        -   name: db-mysql-1
+            ip : 192.168.5.101
+            port : 22
+        -   name: www-mysql-1
+            ip : 192.168.5.102
+            port : 65222

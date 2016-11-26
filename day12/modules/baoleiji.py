@@ -3,7 +3,7 @@
 # @Author  : Coosh
 # @File    : baoleiji.py
 from day12.modules.tables import *
-import hashlib, yaml
+import hashlib, yaml, sqlalchemy
 
 
 class Baoleiji(object):
@@ -116,9 +116,31 @@ class Baoleiji(object):
 
     @staticmethod
     def host2hostgroups(hid, hgid):
-        h2hg_obj = Host2HostGroup(hid=hid, hgid=hgid)
-        session.add(h2hg_obj)
-        session.commit()
+        try:
+            h2hg_obj = Host2HostGroup(hid=hid, hgid=hgid)
+            session.add(h2hg_obj)
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            return False
+
+    @staticmethod
+    def host2hostuser(hid, huid):
+        """
+        创建主机对应的用户认证，它们的关系是多台主机共享一个用户认证方法
+        :param hid:
+        :param huid:
+        :return:
+        """
+        try:
+            h2hu_obj = Host2HostUser(hid=hid, huid=huid)
+            session.add(h2hu_obj)
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            return False
 
     @staticmethod
     def load_user_group(groupname: str):

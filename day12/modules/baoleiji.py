@@ -169,16 +169,56 @@ class Baoleiji(object):
     @staticmethod
     def load_all_host_groups():
         groups_obj_list = session.query(HostGroup).all()
-        return list([[
-                         group.id,
-                         group.name,
-                         group.description,
-                         list([[
-                                   host.id,
-                                   host.name,
-                                   list([hu.id, hu.auth_user] for hu in host.host_user)
-                               ]for host in group.host])
-                     ] for group in groups_obj_list])
+        return list([{
+                         'gid': group.id,
+                         'groupname': group.name,
+                         'description': group.description,
+                         'hosts': list([{
+                                   'hid': host.id,
+                                   'hostname': host.name,
+                                   'auth_users': list({
+                                                          'auth_user_id': hu.id,
+                                                          'auth_user': hu.auth_user
+                                                      } for hu in host.host_user)
+                                }for host in group.host])
+                    } for group in groups_obj_list])
+
+    @staticmethod
+    def user_manage_group(username: str, groupname: str, role: str):
+        """
+        根据组名来管理一组主机
+        :param role: 角色，即主机上的用户
+        :param username: 堡垒机的用户名
+        :param groupname: 主机组名
+        :return:
+        """
+        user = session.query(User).filter(User.name == username).first()
+        host_group = session.query(HostGroup).filter(HostGroup.name == groupname).first()
+        auth_user = session.query(HostUser).filter(HostUser.auth_user == role).first()
+        if user and host_group and auth_user:
+            # 如果三者均存在，检查该主机组的主机是否拥有相关的主机用户
+            has_host_user = session.query(Host2HostUser)\
+                .filter(Host2HostUser.hid == host_group.host[0].id,
+                        Host2HostUser.huid == auth_user.id).first()
+            if has_host_user:
+                for host in host_group.host:
+                    obj = User2Host2HostUser(uid=user.id, hid=host.id, huid=auth_user.id)
+                    Baoleiji.session_add(obj)
+            else:
+                return False
+        else:
+            return False
+
+    @staticmethod
+    def user_manage_host(username: str, hostname: str, role: str):
+        """
+        根据主机名来管理特定主机
+        :param username: 堡垒机用户
+        :param hostname: 主机名
+        :param role: 角色
+        :return:
+        """
+        pass
 
     @staticmethod
     def load_user(username: str):

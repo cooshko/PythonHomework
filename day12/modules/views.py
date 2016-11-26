@@ -108,24 +108,37 @@ class Views(object):
                         h2hu_obj = Baoleiji.host2hostuser(hid, huid)
         return True
 
-    @staticmethod
-    def connect_user_host_hostuser():
-        current_user = {"id":1, "name":"coosh"}
-        menu = Baoleiji.load_all_host_groups()
-        for group in menu:
-            print(group[0], group[2])
-        group_choice = int(input("请输入主机组：").strip())
-        for host in menu[group_choice]:
-            print(host[0], host[1])
-        host_choice = int(input("请输入主机：").strip())
-        for host_user in menu[group_choice][host_choice]:
-            print(host_user[0], host_user[1])
-        host_user_choice = int(input("请输入用户：").strip())
+    # @staticmethod
+    # def connect_user_host_hostuser():
+    #     current_user = {"id":1, "name":"coosh"}
+    #     menu = Baoleiji.load_all_host_groups()
+    #     for key, group in enumerate(menu):
+    #         print(key+1, group['groupname'])
+    #     group_choice = menu[int(input("请输入主机组：").strip()) - 1]
+    #     print("-->", group_choice['groupname'])
+    #     for key, host in enumerate(group_choice['hosts']):
+    #         print(key+1, host['hostname'])
+    #     host_choice = group_choice['hosts'][int(input("请输入主机：").strip()) - 1]
+    #     for key, host_user in enumerate(host_choice['auth_users']):
+    #         print(key+1, host_user['auth_user'])
+    #     host_user_choice = host_choice['auth_users'][int(input("请输入用户：").strip()) - 1]
+    #     return host_user_choice
+
 
 if __name__ == '__main__':
     # Views.create_user_groups_from_console()
     # Views.create_host_groups_from_console()
     # Views.create_user_from_console()
     # Views.create_host_from_sample()
-    Views.connect_user_host_hostuser()
+    sys.argv.append("--user")
+    sys.argv.append("coosh")
+    sys.argv.append("--manage")
+    sys.argv.append("--group")
+    sys.argv.append("www")
+    sys.argv.append("--host")
+    sys.argv.append("ubuntu")
+    sys.argv.append("--role")
+    sys.argv.append("mysql")
+    ret = Baoleiji.user_manage_group("coosh", "www", "nginx")
+    print(ret)
     pass

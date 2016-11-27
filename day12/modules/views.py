@@ -108,21 +108,6 @@ class Views(object):
                         h2hu_obj = Baoleiji.host2hostuser(hid, huid)
         return True
 
-    # @staticmethod
-    # def connect_user_host_hostuser():
-    #     current_user = {"id":1, "name":"coosh"}
-    #     menu = Baoleiji.load_all_host_groups()
-    #     for key, group in enumerate(menu):
-    #         print(key+1, group['groupname'])
-    #     group_choice = menu[int(input("请输入主机组：").strip()) - 1]
-    #     print("-->", group_choice['groupname'])
-    #     for key, host in enumerate(group_choice['hosts']):
-    #         print(key+1, host['hostname'])
-    #     host_choice = group_choice['hosts'][int(input("请输入主机：").strip()) - 1]
-    #     for key, host_user in enumerate(host_choice['auth_users']):
-    #         print(key+1, host_user['auth_user'])
-    #     host_user_choice = host_choice['auth_users'][int(input("请输入用户：").strip()) - 1]
-    #     return host_user_choice
 
 
 if __name__ == '__main__':
@@ -143,8 +128,8 @@ if __name__ == '__main__':
     # ret = Baoleiji.user_manage_group("panny", "db", "mysql")
     # Baoleiji.user_manage_group("panny", "www", "nginx")
     # print(ret)
-    # Baoleiji.user_auth("coosh","coosh123")
+    # Baoleiji.load_user_info("coosh","coosh123")
     # Baoleiji.user_manage_group("panny", "ww", "nginx", leave=True)
     # Baoleiji.user_manage_host("panny", "www-mysql-1", "mysql", leave=True)
-    print(Baoleiji.user_auth("panny", "panny123"))
+    print(Baoleiji.load_user_info("panny", "panny123"))
     pass

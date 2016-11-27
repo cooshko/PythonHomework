@@ -261,7 +261,7 @@ class Baoleiji(object):
             return False
 
     @staticmethod
-    def user_auth(username: str, password: str):
+    def load_user_info(username: str, password: str):
         """
         堡垒机用户认证，除了用户名密码外，认证过程中还会涉及用户是否enable
         :param username:
@@ -285,7 +285,8 @@ class Baoleiji(object):
                 for hg in host_groups:
                     hgid = hg[0]
                     hg_name = session.query(HostGroup.name).filter(HostGroup.id == hgid).first().name
-                    h2hu_by_hg = session.query(Host.name, Host.ip, HostUser.auth_user)\
+                    h2hu_by_hg = session.query(Host.name, Host.ip, HostUser.auth_user,
+                                               HostUser.using_key, HostUser.auth_pass, HostUser.auth_key)\
                         .filter(
                         User2Host2HostUser.uid == user.id,
                         User2Host2HostUser.hid == Host.id,

@@ -141,7 +141,10 @@ if __name__ == '__main__':
     sys.argv.append("mysql")
     # ret = Baoleiji.user_manage_group("coosh", "www", "nginx")
     # ret = Baoleiji.user_manage_group("panny", "db", "mysql")
+    # Baoleiji.user_manage_group("panny", "www", "nginx")
     # print(ret)
     # Baoleiji.user_auth("coosh","coosh123")
-    Baoleiji.user_auth("panny","panny123")
+    # Baoleiji.user_manage_group("panny", "ww", "nginx", leave=True)
+    # Baoleiji.user_manage_host("panny", "www-mysql-1", "mysql", leave=True)
+    print(Baoleiji.user_auth("panny", "panny123"))
     pass

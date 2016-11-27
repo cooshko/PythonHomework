@@ -185,7 +185,7 @@ class Baoleiji(object):
                     } for group in groups_obj_list])
 
     @staticmethod
-    def user_manage_group(username: str, groupname: str, role: str):
+    def user_manage_group(username: str, groupname: str, role: str, leave=False):
         """
         根据组名来管理一组主机
         :param role: 角色，即主机上的用户
@@ -196,23 +196,37 @@ class Baoleiji(object):
         user = session.query(User).filter(User.name == username).first()
         host_group = session.query(HostGroup).filter(HostGroup.name == groupname).first()
         auth_user = session.query(HostUser).filter(HostUser.auth_user == role).first()
+
+
         if user and host_group and auth_user:
             # 如果三者均存在，检查该主机组的主机是否拥有相关的主机用户
-            has_host_user = session.query(Host2HostUser)\
-                .filter(Host2HostUser.hid == host_group.host[0].id,
-                        Host2HostUser.huid == auth_user.id).first()
-            if has_host_user:
-                for host in host_group.host:
-                    obj = User2Host2HostUser(uid=user.id, hid=host.id, hgid=host_group.id, huid=auth_user.id)
-                    Baoleiji.session_add(obj)
+            if leave:
+                # 如果是取消管理主机组
+                session.query(User2Host2HostUser) \
+                    .filter(User2Host2HostUser.uid == user.id,
+                            User2Host2HostUser.hgid == host_group.id,
+                            User2Host2HostUser.huid == auth_user.id) \
+                    .delete()
+                session.commit()
                 return True
             else:
-                return False
+                # 堡垒机用户管理主机组
+                has_host_user = session.query(Host2HostUser)\
+                    .filter(Host2HostUser.hid == host_group.host[0].id,
+                            Host2HostUser.huid == auth_user.id).first()
+                if has_host_user:
+                    # 如果该主机对应有这个主机用户
+                    for host in host_group.host:
+                        obj = User2Host2HostUser(uid=user.id, hid=host.id, hgid=host_group.id, huid=auth_user.id)
+                        Baoleiji.session_add(obj)
+                    return True
+                else:
+                    return False
         else:
             return False
 
     @staticmethod
-    def user_manage_host(username: str, hostname: str, role: str):
+    def user_manage_host(username: str, hostname: str, role: str, leave=False):
         """
         根据主机名来管理特定主机
         :param username: 堡垒机用户
@@ -225,15 +239,24 @@ class Baoleiji(object):
         auth_user = session.query(HostUser).filter(HostUser.auth_user == role).first()
         if user and host and auth_user:
             # 三者均存在
-            has_host_user = session.query(Host2HostUser)\
-                .filter(Host2HostUser.hid == host.id,
-                        Host2HostUser.huid == auth_user.id).first()
-            if has_host_user:
-                # 如果主机上有对应的主机用户，那么关联到堡垒机用户
-                obj = User2Host2HostUser(uid=user.id, hid=host.id, huid=auth_user.id)
-                Baoleiji.session_add(obj)
+            if leave:
+                # 堡垒机用户不再拥有特定主机的特定账户
+                session.query(User2Host2HostUser).filter(User2Host2HostUser.uid == user.id,
+                                                         User2Host2HostUser.hid == host.id,
+                                                         User2Host2HostUser.huid == auth_user.id)\
+                                                 .delete()
+                session.commit()
+                return True
             else:
-                return False
+                has_host_user = session.query(Host2HostUser)\
+                    .filter(Host2HostUser.hid == host.id,
+                            Host2HostUser.huid == auth_user.id).first()
+                if has_host_user:
+                    # 如果主机上有对应的主机用户，那么关联到堡垒机用户
+                    obj = User2Host2HostUser(uid=user.id, hid=host.id, huid=auth_user.id)
+                    Baoleiji.session_add(obj)
+                else:
+                    return False
         else:
             return False
 
@@ -269,8 +292,8 @@ class Baoleiji(object):
                         User2Host2HostUser.huid == HostUser.id,
                         User2Host2HostUser.hgid == hgid
                     ).all()
-                    ret[hg_name] =
-
+                    ret[hg_name] = h2hu_by_hg
+                return ret
         else:
             # 认证失败
             return False

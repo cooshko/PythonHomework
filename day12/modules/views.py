@@ -116,21 +116,40 @@ class Views(object):
         elif os.name == "posix":
             os.system("clear")
         while True:
-            username = input("用户名：").strip()
-            if username:
-                break
+            while True:
+                username = input("用户名：").strip()
+                if username:
+                    break
+                else:
+                    print("用户名不能为空")
+            while True:
+                password = getpass.getpass(prompt="密码：").strip()
+                if password:
+                    break
+                else:
+                    print("密码不能为空")
+
+            # 开始读取用户信息，如果返回False，则代表用户名密码错
+            info = Baoleiji.load_user_info(username, password)
+            if info:
+                # 认证通过会得到可以访问的主机信息
+                enum_info = enumerate(info, 1)
+                group_list = []
+                for key, g in enum_info:
+                    group_list.append(g)
+                    print(str(key)+")", g)
+                group_choice = int(input("\n请输入你要访问的组：").strip()) - 1
+                group_name = group_list[group_choice]
+                print("-->", group_name)
+                enum_host_info = enumerate(info[group_name], 1)
+                host_list = []
+                for key, host_info in enum_host_info:
+                    host_list.append(host_info)
+                    print(str(key)+")", host_info[0], host_info[2] + "@" + host_info[1])
+                host_choice = int(input("\n请输入你要访问的主机：").strip()) - 1
+                print(host_list[host_choice])
             else:
-                print("用户名不能为空")
-        while True:
-            password = getpass.getpass(prompt="密码：").strip()
-            if password:
-                break
-            else:
-                print("密码不能为空")
-
-        # 开始读取用户信息，如果返回False，则代表用户名密码错
-
-
+                print("用户名或密码不正确")
 
 
 if __name__ == '__main__':
@@ -154,5 +173,6 @@ if __name__ == '__main__':
     # Baoleiji.load_user_info("coosh","coosh123")
     # Baoleiji.user_manage_group("panny", "ww", "nginx", leave=True)
     # Baoleiji.user_manage_host("panny", "www-mysql-1", "mysql", leave=True)
-    print(Baoleiji.load_user_info("panny", "panny123"))
+    # print(Baoleiji.load_user_info("panny", "panny123"))
+    Views.interactive()
     pass

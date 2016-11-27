@@ -139,6 +139,9 @@ if __name__ == '__main__':
     sys.argv.append("ubuntu")
     sys.argv.append("--role")
     sys.argv.append("mysql")
-    ret = Baoleiji.user_manage_group("coosh", "www", "nginx")
-    print(ret)
+    # ret = Baoleiji.user_manage_group("coosh", "www", "nginx")
+    # ret = Baoleiji.user_manage_group("panny", "db", "mysql")
+    # print(ret)
+    # Baoleiji.user_auth("coosh","coosh123")
+    Baoleiji.user_auth("panny","panny123")
     pass

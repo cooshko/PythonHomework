@@ -4,7 +4,7 @@
 
 import os, sys, datetime, configparser
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Index
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Index, func
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.types import Boolean
@@ -120,8 +120,9 @@ class User2Host2HostUser(Base):
     __tablename__ = "user2host2host_user"
     uid = Column(Integer, ForeignKey("user.id"), primary_key=True)
     hid = Column(Integer, ForeignKey("host.id"), primary_key=True)
+    hgid = Column(Integer, ForeignKey("host_group.id"), primary_key=True)
     huid = Column(Integer, ForeignKey("host_user.id"), primary_key=True)
-    __table_args__ = ((UniqueConstraint("uid", "hid", "huid", name="_u_h_hu_uc")),)
+    __table_args__ = ((UniqueConstraint("uid", "hid", "hgid", "huid", name="_u_h_hg_hu_uc")),)
 
 
 if __name__ == '__main__':

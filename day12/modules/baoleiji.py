@@ -136,15 +136,16 @@ class Baoleiji(object):
         return ret
 
     @staticmethod
-    def user2host2hostuser(uid, hid, huid):
+    def user2host2hostuser(uid, hid, hgid, huid):
         """
         建立堡垒机用户-主机-主机用户的管理
+        :param hgid:
         :param uid:
         :param hid:
         :param huid:
         :return:
         """
-        obj = User2Host2HostUser(uid=int(uid), hid=int(hid), huid=int(huid))
+        obj = User2Host2HostUser(uid=int(uid), hid=int(hid), hgid=int(hgid), huid=int(huid))
         ret = Baoleiji.session_add(obj)
         return ret
 
@@ -202,8 +203,9 @@ class Baoleiji(object):
                         Host2HostUser.huid == auth_user.id).first()
             if has_host_user:
                 for host in host_group.host:
-                    obj = User2Host2HostUser(uid=user.id, hid=host.id, huid=auth_user.id)
+                    obj = User2Host2HostUser(uid=user.id, hid=host.id, hgid=host_group.id, huid=auth_user.id)
                     Baoleiji.session_add(obj)
+                return True
             else:
                 return False
         else:
@@ -218,7 +220,60 @@ class Baoleiji(object):
         :param role: 角色
         :return:
         """
-        pass
+        user = session.query(User).filter(User.name == username).first()
+        host = session.query(Host).filter(Host.name == hostname).first()
+        auth_user = session.query(HostUser).filter(HostUser.auth_user == role).first()
+        if user and host and auth_user:
+            # 三者均存在
+            has_host_user = session.query(Host2HostUser)\
+                .filter(Host2HostUser.hid == host.id,
+                        Host2HostUser.huid == auth_user.id).first()
+            if has_host_user:
+                # 如果主机上有对应的主机用户，那么关联到堡垒机用户
+                obj = User2Host2HostUser(uid=user.id, hid=host.id, huid=auth_user.id)
+                Baoleiji.session_add(obj)
+            else:
+                return False
+        else:
+            return False
+
+    @staticmethod
+    def user_auth(username: str, password: str):
+        """
+        堡垒机用户认证，除了用户名密码外，认证过程中还会涉及用户是否enable
+        :param username:
+        :param password:
+        :return: 返回当前用户能操纵的主机列表
+        """
+        m = hashlib.md5()
+        m.update(password.encode())
+        password_md5 = m.hexdigest()
+        user = session.query(User).filter(User.name == username,
+                                             User.password == password_md5,
+                                             User.enable == True).first()
+        if user:
+            # 获取用户能操纵的主机列表
+            # u2h2hu = session.query(User2Host2HostUser).filter(User2Host2HostUser.uid == user.id).all()
+            host_groups = session.query(func.distinct(User2Host2HostUser.hgid))\
+                .filter(User2Host2HostUser.uid == user.id).all()
+            # print(host_groups)
+            ret = dict()
+            if host_groups:
+                for hg in host_groups:
+                    hgid = hg[0]
+                    hg_name = session.query(HostGroup.name).filter(HostGroup.id == hgid).first().name
+                    h2hu_by_hg = session.query(Host.name, Host.ip, HostUser.auth_user)\
+                        .filter(
+                        User2Host2HostUser.uid == user.id,
+                        User2Host2HostUser.hid == Host.id,
+                        User2Host2HostUser.huid == HostUser.id,
+                        User2Host2HostUser.hgid == hgid
+                    ).all()
+                    ret[hg_name] =
+
+        else:
+            # 认证失败
+            return False
 
     @staticmethod
     def load_user(username: str):

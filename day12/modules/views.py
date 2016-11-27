@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Author  : Coosh
 # @File    : views.py
-import sys, yaml
+import sys, yaml, os, getpass
 from day12.modules.baoleiji import Baoleiji
 
 
@@ -107,6 +107,29 @@ class Views(object):
                     for huid in huid_list:
                         h2hu_obj = Baoleiji.host2hostuser(hid, huid)
         return True
+
+    @staticmethod
+    def interactive():
+        # 清屏
+        if os.name == "nt":
+            os.system("cls")
+        elif os.name == "posix":
+            os.system("clear")
+        while True:
+            username = input("用户名：").strip()
+            if username:
+                break
+            else:
+                print("用户名不能为空")
+        while True:
+            password = getpass.getpass(prompt="密码：").strip()
+            if password:
+                break
+            else:
+                print("密码不能为空")
+
+        # 开始读取用户信息，如果返回False，则代表用户名密码错
+
 
 
 

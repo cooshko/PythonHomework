@@ -2,19 +2,40 @@
 # -*- coding: utf-8 -*-
 # @Author  : Coosh
 
-import os, sys, datetime, paramiko, socket, logging
+import os, sys, datetime, paramiko, socket, logging, json
 APP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(APP_ROOT)
 LOG_DIR = os.path.join(APP_ROOT, 'log')
+DATA_DIR = os.path.join(APP_ROOT, 'data')
 
 # windows does not have termios...
 try:
     import termios
     import tty
 
-    has_termios = True
+    HAS_TERMIOS = True
 except ImportError:
-    has_termios = False
+    HAS_TERMIOS = False
+
+
+# 日志装饰器函数
+FF = logging.Formatter(fmt="%(asctime)s - %(levelname)s - %(message)s", datefmt="%F %H:%M:%S")
+FH = logging.FileHandler(filename=os.path.join(LOG_DIR, "access.log"), encoding="utf-8")
+FH.setLevel(logging.DEBUG)
+FH.setFormatter(FF)
+LOGGER = logging.getLogger('ACCESS-LOG')
+LOGGER.setLevel(logging.DEBUG)
+LOGGER.addHandler(FH)
+def log_access(func):
+    def wrapper(*args, **kwargs):
+        myssh = args[0]
+        args_str = json.dumps(args[1:])
+        kwargs_str = json.dumps(kwargs)
+        log_msg = "%s %s %s" % (myssh.user, func.__name__, args_str + kwargs_str)
+        LOGGER.info(log_msg)
+        ret = func(*args, **kwargs)
+        return ret
+    return wrapper
 
 
 class MySSH(object):
@@ -57,29 +78,32 @@ class MySSH(object):
                                 port=self.port,
                                 username=ssh_user,
                                 password=self.ssh_pass)
+        self.chan = self.client.invoke_shell()
+        t = self.client.get_transport()
+        self.sftp_client = paramiko.SFTPClient.from_transport(t)
 
     def interactive_shell(self):
-        if has_termios:
+        if HAS_TERMIOS:
             self.posix_shell()
         else:
             self.windows_shell()
 
     def posix_shell(self):
         import select
-        chan = self.client.invoke_shell()
+        # chan = self.client.invoke_shell()
         oldtty = termios.tcgetattr(sys.stdin)
         try:
             tty.setraw(sys.stdin.fileno())
             tty.setcbreak(sys.stdin.fileno())
-            chan.settimeout(0.0)
+            self.chan.settimeout(0.0)
 
             cmd = ""
             tab_flag = False
             while True:
-                r, w, e = select.select([chan, sys.stdin], [], [])
-                if chan in r:
+                r, w, e = select.select([self.chan, sys.stdin], [], [])
+                if self.chan in r:
                     try:
-                        x = chan.recv(10240).decode()
+                        x = self.chan.recv(10240).decode()
                         if len(x) == 0:
                             sys.stdout.write('\r\n*** EOF\r\n')
                             break
@@ -104,7 +128,7 @@ class MySSH(object):
                         tab_flag = True
                     else:
                         cmd += x
-                    chan.send(x)
+                    self.chan.send(x)
         finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
 
@@ -129,7 +153,7 @@ class MySSH(object):
                 sys.stdout.write(data)
                 sys.stdout.flush()
 
-        writer = threading.Thread(target=writeall, args=(chan,))
+        writer = threading.Thread(target=writeall, args=(self.chan,))
         writer.start()
 
         try:
@@ -137,13 +161,43 @@ class MySSH(object):
                 d = sys.stdin.read(1)
                 if not d:
                     break
-                chan.send(d)
+                self.chan.send(d)
         except EOFError:
             # user hit ^Z or F6
             pass
+        except OSError:
+            pass
 
+    @log_access
+    def upload_file(self, local_file, remote_path):
+        """
+        上传文件
+        :param filepath:
+        :return:
+        """
+        # t = self.client.get_transport()
+        # sftp_client = paramiko.SFTPClient.from_transport(t)
+        filename = os.path.basename(local_file)
+        remote_file = os.path.join(remote_path, filename)
+        ret = self.sftp_client.put(local_file, remote_file)
+        return ret
+
+    @log_access
+    def download_file(self, remote_file):
+        """
+        下载文件
+        :param remote_file:
+        :return:
+        """
+        filename = os.path.basename(remote_file)
+        if not os.path.isdir(os.path.join(DATA_DIR, self.hostname)):
+            os.mkdir(os.path.join(DATA_DIR, self.hostname))
+        local_file = os.path.join(DATA_DIR, self.hostname, filename)
+        self.sftp_client.get(remote_file, local_file)
 
 if __name__ == '__main__':
     ms = MySSH("coosh", "192.168.5.138", 22, "root", False, "24559982", "")
     # ms = MySSH("192.168.5.41", 22, "coosh", True, "", r"C:\Users\Coosh\Documents\Identity")
-    ms.interactive_shell()
+    # ms.interactive_shell()
+    ms.upload_file(local_file=r"e:\test.txt", remote_path=r"/tmp")
+    # ms.download_file(r"/tmp/test.txt")

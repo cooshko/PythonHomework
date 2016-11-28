@@ -9,8 +9,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.types import Boolean
 
+conf_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+conf_file = os.path.join(conf_dir, 'conf', 'baoleiji.conf')
 cp = configparser.ConfigParser()
-cp.read(r"../conf/baoleiji.conf")
+cp.read(conf_file)
 db_type = cp['db']['db_type']
 db_connector = cp['db']['connector']
 db_ip = cp['db']['ip']

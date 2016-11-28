@@ -1,0 +1,20 @@
+-   groupname: lab
+    auth_set :
+        -   user : root
+            password : 24559982
+    hosts:
+        -   name: lab2
+            ip : 192.168.5.138
+            port : 22
+        -   name: lab3
+            ip : 192.168.5.142
+            port : 22
+
+-   groupname: production
+    auth_set:
+        -   user : coosh
+            key : C:\Users\Coosh\Documents\Identity
+    hosts:
+        -   name: lab1
+            ip : 192.168.5.41
+            port : 22

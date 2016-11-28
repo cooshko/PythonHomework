@@ -27,12 +27,20 @@ class Baoleiji(object):
         :param host_groups:
         :return:
         """
-        whole_list = []
+        # whole_list = []
+        ret = []
         for g in host_groups:
-            whole_list.append(HostGroup(name=g['name'], description=g['description']))
-        session.add_all(whole_list)  # 使用add_all减少数据库交换
-        session.commit()
-        ret = list([g.id for g in whole_list])
+            group_exist = Baoleiji.load_host_group(g['name'])
+            if group_exist:
+                ret.append(group_exist.id)
+            else:
+                group_obj = HostGroup(name=g['name'], description=g['description'])
+                Baoleiji.session_add(group_obj)
+                ret.append(group_obj.id)
+        #     whole_list.append(HostGroup(name=g['name'], description=g['description']))
+        # session.add_all(whole_list)  # 使用add_all减少数据库交换
+        # session.commit()
+        # ret = list([g.id for g in whole_list])
         return ret
 
     @staticmethod
@@ -285,7 +293,7 @@ class Baoleiji(object):
                 for hg in host_groups:
                     hgid = hg[0]
                     hg_name = session.query(HostGroup.name).filter(HostGroup.id == hgid).first().name
-                    h2hu_by_hg = session.query(Host.name, Host.ip, HostUser.auth_user,
+                    h2hu_by_hg = session.query(Host.name, Host.ip, Host.port, HostUser.auth_user,
                                                HostUser.using_key, HostUser.auth_pass, HostUser.auth_key)\
                         .filter(
                         User2Host2HostUser.uid == user.id,

@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 # @Author  : Coosh
 # @File    : views.py
-import sys, yaml, os, getpass
+import sys, yaml, os, getpass, paramiko
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(ROOT)
 from day12.modules.baoleiji import Baoleiji
+from day12.modules.myssh import MySSH
 
 
 class Views(object):
@@ -31,7 +34,7 @@ class Views(object):
         Views.baoleiji.create_user_groups(li)
 
     @staticmethod
-    def create_host_groups_from_console():
+    def create_host_groups_from_sample():
         """
         创建主机组
         :return:
@@ -72,7 +75,9 @@ class Views(object):
 
     @staticmethod
     def create_host_from_sample():
-        filepath = r"../samples/new_hosts.txt"
+        # filepath = r"../samples/new_hosts.txt"
+        filepath = r"../samples/real_hosts.txt"
+
         with open(filepath) as fh:
             var = yaml.load(fh)
         for group in var:
@@ -80,7 +85,8 @@ class Views(object):
             group_obj = Baoleiji.load_host_group(groupname)
             hgid = None
             if not group_obj:
-                raise Exception(groupname, "不存在，无法继续。")
+                print(groupname, "主机组不存在，无法添加该组名下的主机。")
+                continue
             else:
                 hgid = group_obj.id
             huid_list = []
@@ -116,6 +122,7 @@ class Views(object):
         elif os.name == "posix":
             os.system("clear")
         while True:
+            # 让用户输入认证信息
             while True:
                 username = input("用户名：").strip()
                 if username:
@@ -123,7 +130,9 @@ class Views(object):
                 else:
                     print("用户名不能为空")
             while True:
-                password = getpass.getpass(prompt="密码：").strip()
+                # pycharm支持不是很好，先注释掉getpass
+                # password = getpass.getpass(prompt="密码：").strip()
+                password = input("密码：").strip()
                 if password:
                     break
                 else:
@@ -132,29 +141,34 @@ class Views(object):
             # 开始读取用户信息，如果返回False，则代表用户名密码错
             info = Baoleiji.load_user_info(username, password)
             if info:
-                # 认证通过会得到可以访问的主机信息
-                enum_info = enumerate(info, 1)
-                group_list = []
-                for key, g in enum_info:
-                    group_list.append(g)
-                    print(str(key)+")", g)
-                group_choice = int(input("\n请输入你要访问的组：").strip()) - 1
-                group_name = group_list[group_choice]
-                print("-->", group_name)
-                enum_host_info = enumerate(info[group_name], 1)
-                host_list = []
-                for key, host_info in enum_host_info:
-                    host_list.append(host_info)
-                    print(str(key)+")", host_info[0], host_info[2] + "@" + host_info[1])
-                host_choice = int(input("\n请输入你要访问的主机：").strip()) - 1
-                print(host_list[host_choice])
+                while True:
+                    # 认证通过会得到可以访问的主机信息
+                    enum_info = enumerate(info, 1)
+                    # 循环让用户选择要访问的主机
+                    group_list = []
+                    for key, g in enum_info:
+                        group_list.append(g)
+                        print(str(key)+")", g)
+                    group_choice = int(input("\n请输入你要访问的组：").strip()) - 1
+                    group_name = group_list[group_choice]
+                    print("-->", group_name)
+                    enum_host_info = enumerate(info[group_name], 1)
+                    host_list = []
+                    for key, host_info in enum_host_info:
+                        host_list.append(host_info)
+                        print(str(key)+")", host_info[0], host_info[3] + "@" + host_info[1])
+                    host_choice = int(input("\n请输入你要访问的主机：").strip()) - 1
+                    hostname, ip, port, auth_user, using_key, auth_pass, auth_key = host_info
+                    myssh = MySSH(user=username, hostname=ip, port=port, ssh_user=auth_user, using_key=using_key,
+                                  passwd=auth_pass, pkey_file=auth_key)
+                    myssh.interactive_shell()
             else:
                 print("用户名或密码不正确")
 
 
 if __name__ == '__main__':
     # Views.create_user_groups_from_console()
-    # Views.create_host_groups_from_console()
+    # Views.create_host_groups_from_sample()
     # Views.create_user_from_console()
     # Views.create_host_from_sample()
     sys.argv.append("--user")
@@ -167,6 +181,8 @@ if __name__ == '__main__':
     sys.argv.append("--role")
     sys.argv.append("mysql")
     # ret = Baoleiji.user_manage_group("coosh", "www", "nginx")
+    # ret = Baoleiji.user_manage_group("coosh", "lab", "root")
+    # ret = Baoleiji.user_manage_group("coosh", "production", "coosh")
     # ret = Baoleiji.user_manage_group("panny", "db", "mysql")
     # Baoleiji.user_manage_group("panny", "www", "nginx")
     # print(ret)

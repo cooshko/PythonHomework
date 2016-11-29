@@ -127,6 +127,13 @@ class User2Host2HostUser(Base):
     __table_args__ = ((UniqueConstraint("uid", "hid", "hgid", "huid", name="_u_h_hg_hu_uc")),)
 
 
+def create_db_tables():
+    Base.metadata.create_all(engine)
+
+
+def drop_db_tables():
+    Base.metadata.drop_all(engine)
+
 if __name__ == '__main__':
     # Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

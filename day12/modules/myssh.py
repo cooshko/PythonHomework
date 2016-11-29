@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Author  : Coosh
 
-import os, sys, datetime, paramiko, socket, logging, json
+import os, sys, datetime, paramiko, socket, logging, json, types
 APP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(APP_ROOT)
 LOG_DIR = os.path.join(APP_ROOT, 'log')
@@ -29,9 +29,19 @@ LOGGER.addHandler(FH)
 def log_access(func):
     def wrapper(*args, **kwargs):
         myssh = args[0]
-        args_str = json.dumps(args[1:])
-        kwargs_str = json.dumps(kwargs)
-        log_msg = "%s %s %s" % (myssh.user, func.__name__, args_str + kwargs_str)
+        # args_str = json.dumps(args[1:])
+        # kwargs_str = json.dumps(kwargs)
+        args_for_log = []
+        for arg in args[1:]:
+            if not isinstance(arg, types.FunctionType):
+                args_for_log.append(arg)
+        kwargs_for_log = dict()
+        for key in kwargs:
+            if not isinstance(kwargs[key], types.FunctionType):
+                kwargs_for_log[key] = kwargs[key]
+        args_str = json.dumps(args_for_log)
+        kwargs_str = json.dumps(kwargs_for_log)
+        log_msg = "%s on %s %s %s" % (myssh.user, myssh.hostname, func.__name__, args_str + kwargs_str)
         LOGGER.info(log_msg)
         ret = func(*args, **kwargs)
         return ret
@@ -81,6 +91,17 @@ class MySSH(object):
         self.chan = self.client.invoke_shell()
         t = self.client.get_transport()
         self.sftp_client = paramiko.SFTPClient.from_transport(t)
+
+    def excute_command(self, cmd, callback):
+        stdin, stdout, stderr = self.client.exec_command(cmd)
+        out = stdout.read()
+        err = stderr.read()
+        b_ret = out if out else err
+        import chardet
+        charset = chardet.detect(b_ret)['encoding']
+        ret = b_ret.decode(encoding=charset)
+        callback(self.hostname, ret)
+
 
     def interactive_shell(self):
         if HAS_TERMIOS:
@@ -169,7 +190,7 @@ class MySSH(object):
             pass
 
     @log_access
-    def upload_file(self, local_file, remote_path):
+    def upload_file(self, local_file, remote_path, callback):
         """
         上传文件
         :param filepath:
@@ -178,22 +199,46 @@ class MySSH(object):
         # t = self.client.get_transport()
         # sftp_client = paramiko.SFTPClient.from_transport(t)
         filename = os.path.basename(local_file)
-        remote_file = os.path.join(remote_path, filename)
-        ret = self.sftp_client.put(local_file, remote_file)
-        return ret
+        if r"/" in remote_path:
+            # linux类的远程主机
+            if remote_path[-1] == r"/":
+                remote_file = remote_path + filename
+            else:
+                remote_file = remote_path + r"/" + filename
+        else:
+            # windows类
+            if remote_path[-1] == "\\":
+                remote_file = remote_path + filename
+            else:
+                remote_file = remote_path + "\\" + filename
+        if os.path.isfile(local_file):
+            try:
+                ret = self.sftp_client.put(local_file, remote_file)
+            except:
+                # 远程路径不存在
+                callback(self.hostname, "远程路径不存在")
+        else:
+            callback(self.hostname, "本地文件不存在")
 
     @log_access
-    def download_file(self, remote_file):
+    def download_file(self, remote_file, callback, toplevel_dir="by_host", secondary_dir="."):
         """
         下载文件
-        :param remote_file:
+        :param secondary_dir: 如果是按组下载，则再却分来自哪个组
+        :param toplevel_dir: 下载到本地后，存到指定目录，但要区分是按组还是按主机来下载
+        :param remote_file: 远程文件路径
         :return:
         """
         filename = os.path.basename(remote_file)
-        if not os.path.isdir(os.path.join(DATA_DIR, self.hostname)):
-            os.mkdir(os.path.join(DATA_DIR, self.hostname))
-        local_file = os.path.join(DATA_DIR, self.hostname, filename)
-        self.sftp_client.get(remote_file, local_file)
+        local_dir = os.path.join(DATA_DIR, toplevel_dir, secondary_dir)
+        # if not os.path.isdir(local_dir):
+        os.makedirs(name=local_dir, exist_ok=True)
+        local_file = os.path.join(local_dir, filename)
+        try:
+            self.sftp_client.get(remote_file, local_file)
+            return True
+        except FileNotFoundError:
+            callback(self.hostname, "文件不存在")
 
 if __name__ == '__main__':
     ms = MySSH("coosh", "192.168.5.138", 22, "root", False, "24559982", "")

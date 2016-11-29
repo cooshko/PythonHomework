@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 # @Author  : Coosh
 # @File    : baoleiji.py
+import os, sys
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(ROOT)
 from day12.modules.tables import *
 import hashlib, yaml, sqlalchemy
 
@@ -14,11 +17,9 @@ class Baoleiji(object):
         :param user_groups:example: [{group1: name, desc: description}, {group2: name, desc: description}]
         :return:
         """
-        whole_list = []
         for g in user_groups:
-            whole_list.append(UserGroup(name=g['name'], description=g['description']))
-        session.add_all(whole_list)  # 使用add_all减少数据库交换
-        session.commit()
+            ug_obj = UserGroup(name=g.get('name'), description=g.get('description'))
+            Baoleiji.session_add(ug_obj)
 
     @staticmethod
     def create_host_groups(host_groups: list):  # example参考上面
@@ -204,8 +205,6 @@ class Baoleiji(object):
         user = session.query(User).filter(User.name == username).first()
         host_group = session.query(HostGroup).filter(HostGroup.name == groupname).first()
         auth_user = session.query(HostUser).filter(HostUser.auth_user == role).first()
-
-
         if user and host_group and auth_user:
             # 如果三者均存在，检查该主机组的主机是否拥有相关的主机用户
             if leave:
@@ -234,9 +233,10 @@ class Baoleiji(object):
             return False
 
     @staticmethod
-    def user_manage_host(username: str, hostname: str, role: str, leave=False):
+    def user_manage_host(username: str, hostgroup:str, hostname: str, role: str, leave=False):
         """
         根据主机名来管理特定主机
+        :param groupname:
         :param username: 堡垒机用户
         :param hostname: 主机名
         :param role: 角色
@@ -244,13 +244,15 @@ class Baoleiji(object):
         """
         user = session.query(User).filter(User.name == username).first()
         host = session.query(Host).filter(Host.name == hostname).first()
+        group = session.query(HostGroup).filter(HostGroup.name == hostgroup).first()
         auth_user = session.query(HostUser).filter(HostUser.auth_user == role).first()
-        if user and host and auth_user:
-            # 三者均存在
+        if user and host and group and auth_user:
+            # 四者均存在
             if leave:
                 # 堡垒机用户不再拥有特定主机的特定账户
                 session.query(User2Host2HostUser).filter(User2Host2HostUser.uid == user.id,
                                                          User2Host2HostUser.hid == host.id,
+                                                         User2Host2HostUser.hgid == group.id,
                                                          User2Host2HostUser.huid == auth_user.id)\
                                                  .delete()
                 session.commit()
@@ -259,10 +261,13 @@ class Baoleiji(object):
                 has_host_user = session.query(Host2HostUser)\
                     .filter(Host2HostUser.hid == host.id,
                             Host2HostUser.huid == auth_user.id).first()
-                if has_host_user:
+                host_in_hostgroup = session.query(Host2HostGroup).filter(Host2HostGroup.hgid == group.id,
+                                                                         Host2HostGroup.hid == host.id).first()
+                if has_host_user and host_in_hostgroup:
                     # 如果主机上有对应的主机用户，那么关联到堡垒机用户
-                    obj = User2Host2HostUser(uid=user.id, hid=host.id, huid=auth_user.id)
+                    obj = User2Host2HostUser(uid=user.id, hid=host.id, huid=auth_user.id, hgid=group.id)
                     Baoleiji.session_add(obj)
+                    return True
                 else:
                     return False
         else:
@@ -315,9 +320,26 @@ class Baoleiji(object):
     def load_host(hostname: str):
         return session.query(Host).filter(Host.name == hostname).first()
 
+    @staticmethod
+    def user_change_password(username: str,new_password: str):
+        m = hashlib.md5()
+        m.update(new_password.encode())
+        new_password_md5 = m.hexdigest()
+        session.query(User).filter(User.name == username).update({'password': new_password_md5})
+        session.commit()
 
+    @staticmethod
+    def enable_user(username: str, enable: bool):
+        session.query(User).filter(User.name == username).update({'enable': enable})
+        session.commit()
 
+    @staticmethod
+    def resync_db():
+        drop_db_tables()
+        create_db_tables()
 
 if __name__ == '__main__':
-    print(Baoleiji.load_user_group("admi1n"))
-    print(Baoleiji.load_host_group("wwww"))
+    # print(Baoleiji.load_user_group("admi1n"))
+    # print(Baoleiji.load_host_group("wwww"))
+    # print(Baoleiji.user_change_password("coosh", "coosh123"))
+    Baoleiji.enable_user("coosh", True)

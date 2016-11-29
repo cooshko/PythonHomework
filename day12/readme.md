@@ -2,7 +2,7 @@
 开发一个由数据库管理的主机管理系统,主机分组、分用户权限管理
 
 > * 程序入口在bin/main.py
-> * 数据库的配置在conf/baoleiji.conf里编辑，需要先自行创建数据库（baoleiji）
+> * 数据库的配置在conf/baoleiji.conf里编辑，需要先自行创建数据库（baoleiji），编码为UTF8
 > * 对于堡垒机管理员，都是命令行操作，可以直接执行main.py查看帮助
 > * 对于普通用户，执行main.py interactive 即可进入交互模式
 > * 用户访问会有日志记录，存放在log/access.log

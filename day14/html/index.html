@@ -145,15 +145,40 @@
         });
 
         function check_all() {
+            if($('#edit_btn').hasClass("editing")){
+                $('#tb :checkbox').not('input:checked').each(function () {
+                    var tr = $(this).parent().parent();
+                    editMode(tr);
+                });
+            }
             $('#tb :checkbox').prop('checked', true); // :checkbox是简写，相当于type=checkbox，注意有个空格
         }
+
         function uncheck_all() {
+            if($('#edit_btn').hasClass("editing")){
+                $('#tb :checkbox:checked').each(function () {
+                    var tr = $(this).parent().parent();
+                    normalMode(tr);
+                });
+            }
             $('#tb :checkbox').prop('checked', false);
         }
+
         function reverse_check() {
-            $('#tb :checkbox').each(function (i) {
+            if($('#edit_btn').hasClass("editing")){
+                $('#tb :checkbox:checked').each(function () {
+                    var tr = $(this).parent().parent();
+                    normalMode(tr);
+                });
+                $('#tb :checkbox').not('input:checked').each(function () {
+                    var tr = $(this).parent().parent();
+                    editMode(tr);
+                });
+            }
+            $('#tb :checkbox').each(function () {
                 var current_status = $(this).prop('checked');
                 $(this).prop('checked', !current_status);
+
             })
         }
     </script>

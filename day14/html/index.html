@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>day14</title>
+    <style>
+        .edit_btn{
+            display: inline-block;
+            border: 1px solid gray;
+            background-color: gray;
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+        }
+        .editing{
+            border: 1px solid gray;
+            background-color: greenyellow;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button onclick="check_all();">全选</button>
+        <button onclick="uncheck_all();">全不选</button>
+        <button onclick="reverse_check();">反选</button>
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        <a id="edit_btn" href="javascript:void(0);" class="edit_btn" onclick="editor_switch(this);">编辑</a>
+        <p></p>
+        <table border="1">
+            <thead>
+                <tr>
+                    <td></td>
+                    <td>学号</td>
+                    <td>姓名</td>
+                    <td>状态</td>
+                </tr>
+            </thead>
+            <tbody id="tb">
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td>1</td>
+                    <td>coosh</td>
+                    <td>在线</td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td>2</td>
+                    <td>panny</td>
+                    <td>在线</td>
+                </tr>
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td>3</td>
+                    <td>mingming</td>
+                    <td>离线</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script src="../plugin/jquery-1.12.4.min.js"></script>
+    <script>
+        status_dict = {0:"在线", 1:"离线"};
+
+
+        function editor_switch(obj) {
+            /*
+            点击编辑按钮的事件处理
+            */
+            var editing=$(obj).hasClass('editing');
+            if(editing){
+                $(obj).removeClass('editing');
+                $(obj).text('编辑');
+                $('#tb tr[editing="editing"]').each(function () {
+                    normalMode($(this));
+                })
+            }else{
+                $(obj).addClass('editing');
+                $(obj).text('取消编辑');
+                $('#tb input:checked').parent().parent().each(function () {
+                    editMode($(this));
+                })
+            }
+        }
+
+        function editMode(obj) {
+            /*
+            将文字转换为可编辑的元素
+            参数obj：jQuery对象，传入的应该是tr对象
+             */
+            $(obj).attr("editing","editing");
+            var id_obj = $(obj).children().eq(1);
+            var id = id_obj.text();
+            id_obj.html('<input value="' + id + '"/>');
+
+            var user_obj = $(obj).children().eq(2);
+            var user = user_obj.text();
+            user_obj.html('<input value="' + user + '"/>');
+
+            var status_obj = $(obj).children().eq(3);
+            var status_ele = status_obj[0];
+            var status = status_obj.text();
+            var select = document.createElement('select');
+            for(var key in status_dict){
+                var option = document.createElement('option');
+                option.value=key;
+                option.text=status_dict[key];
+                if(status_dict[key]==status){
+                    option.setAttribute("selected","selected");
+                }
+                select.appendChild(option);
+            }
+            status_ele.innerHTML=select.outerHTML;
+        }
+
+        function normalMode(obj) {
+            /*
+            将input等可编辑的标签，替换成普通文字
+            参数obj：jQuery对象，传入的应该是tr对象
+             */
+            //移除tr的editing属性
+            $(obj).removeAttr("editing");
+            var id = $(obj).children().eq(1).find('input').val();
+            $(obj).children().eq(1).html(id);
+            var user = $(obj).children().eq(2).find('input').val();
+            $(obj).children().eq(2).html(user);
+            var status = $(obj).children().eq(3).find('select').find('option:selected').text();
+            $(obj).children().eq(3).html(status);
+        }
+
+        // 初始化时绑定checkbox的click事件
+        $(function () {
+            $("#tb :checkbox").bind("click",function () {
+                if($('#edit_btn').hasClass("editing")){
+                    var tr = $(this).parent().parent();
+                    if($(this).prop("checked")){
+                        editMode(tr);
+                    }else{
+                        normalMode(tr);
+                    }
+                }
+            })
+        });
+
+        function check_all() {
+            $('#tb :checkbox').prop('checked', true); // :checkbox是简写，相当于type=checkbox，注意有个空格
+        }
+        function uncheck_all() {
+            $('#tb :checkbox').prop('checked', false);
+        }
+        function reverse_check() {
+            $('#tb :checkbox').each(function (i) {
+                var current_status = $(this).prop('checked');
+                $(this).prop('checked', !current_status);
+            })
+        }
+    </script>
+</body>
+</html>

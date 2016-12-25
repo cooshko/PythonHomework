@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="static/image/favicon.ico">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft YaHei";
+        }
+        body{
+            font-size: 12px;
+        }
+        a{
+            text-decoration: none;
+        }
+        .w2{
+            width: 1194px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .w2 .logo{
+            position: absolute;
+            top:0;
+            left:0;
+        }
+        .fl{
+            float: left;
+        }
+        .fr{
+            float: right;
+        }
+        .search{
+            position: absolute;
+            top: 50px;
+            left: 310px;
+        }
+        .searchbox{
+            border: 1px solid red;
+            height: 25px;
+            width: 500px;
+            padding: 4px;
+        }
+        .cart{
+            position: absolute;
+            right: 0;
+            width: 190px;
+            height: 170px;
+        }
+        .cart div{
+            position: absolute;
+            top: 50px;
+            display: block;
+            width: 190px;
+            height: 33px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: #e3e4e5;
+        }
+        .cart span{
+            line-height: 33px;
+        }
+        .cart img{
+            vertical-align: middle;
+        }
+        .keyword{
+            color: #999;
+        }
+        .pg_shorcut, .pg_shorcut ul{
+            background-color: #e3e4e5;
+            height: 25px;
+        }
+        .pg_shorcut ul{
+            float: right;
+            margin: 0;
+        }
+        .pg_shorcut ul li{
+            list-style: none;
+            float: left;
+            padding-left: 10px;
+            padding-right: 10px;
+            height:25px;
+            color: #999;
+            line-height:25px;
+        }
+        .pg_shorcut ul li:hover{
+            background-color: white;
+            cursor: pointer;
+        }
+        .pg_header .w2{
+            height: 170px;
+        }
+
+        .fs_col1 {
+            width: 190px;
+            height: 100%;
+            margin-right: 10px;
+        }
+        .fs_col2{
+            width: 790px;
+        }
+        .fs_col3{
+            width: 190px;
+            height: 100%;
+            margin-left: 10px;
+            right: 0;
+        }
+        .menu{
+            border: 1px solid #6D6D6D;
+        }
+        .menu_head{
+            border: 1px solid #6D6D6D;
+            background-color: #6D6D6D;
+            color: white;
+            padding:8px;
+        }
+        .menu_head:hover{
+            cursor: pointer;
+            background-color: white;
+            color: #6D6D6D;
+        }
+        .menu_detail{
+            padding:4px;
+            border: 1px solid #6D6D6D;
+        }
+        .ad img{
+            width:100%;
+        }
+        .product{
+            position: relative;
+            width:180px;
+            float: left;
+            margin: 4px;
+            padding:4px;
+        }
+        .product:hover{
+            box-shadow: 0 0 10px rgba(0,0,0,.2);
+        }
+        .product_name{
+            padding:4px;
+            height: 56px;;
+        }
+        .product_price{
+            padding:4px;
+        }
+        .product_img img{
+            width: 166px;
+            height: 151px;
+        }
+        .pg_footer{
+            height: 250px;
+            background-color: #e3e4e5;
+            margin-top: 20px;
+            padding-top: 40px;
+        }
+        .pg_footer ul{
+            width: 198px;
+            float: left;
+        }
+        .pg_footer li{
+            list-style: none;
+            line-height:22px;
+        }
+        .pg_footer h3{
+            margin-bottom: 5px;
+        }
+        .user_info {
+            width: 190px;
+            height: 300px;
+            position: relative;
+            font-size: 15px;
+        }
+        .user_info div{
+            float: left;
+            padding:10px;
+        }
+        .user_info img{
+            height: 50px;
+            border-radius: 23px;
+        }
+        .buy{
+            /*width: 104px;*/
+            height:25px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .buy input{
+            width: 50px;
+            height:25px;
+            border: 0;
+            border-top:1px solid gray;
+            border-bottom:1px solid gray;
+            text-align: center;
+            vertical-align: top;
+        }
+        .buy span{
+            display: inline-block;
+            border:1px solid gray;
+            width: 25px;
+            height: 25px;
+            line-height:25px;
+            vertical-align: top;
+            background-color: gray;
+            color: white;
+        }
+        .buy span:hover{
+            cursor: pointer;
+        }
+        .buy a{
+            display: inline-block;
+            width:25px;
+            height:27px;
+            line-height:27px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: gray;
+            color: white;
+            margin-left: 6px;
+        }
+        .hide{
+            display: none;
+        }
+        .currency{
+            font-size: 8px;
+            color: red;
+        }
+        .real_price{
+            font-weight:bold;
+            font-size: 18px;
+            color: red;
+        }
+    </style>
+    <title>京东商城</title>
+</head>
+<body>
+    <div class="pg_shorcut">
+        <div class="w2">
+            <ul>
+                <li>登录</li>
+                <li>注册</li>
+                <li>我的订单</li>
+                <li>我的收藏</li>
+                <li>VIP会员俱乐部</li>
+                <li>客户服务</li>
+                <li>关注</li>
+                <li>手机版</li>
+            </ul>
+        </div>
+    </div>
+    <div class="pg_header">
+        <div class="w2">
+            <div class="logo fl"><img src="static/image/logo.png"></div>
+            <div class="search fl">
+                <input class="searchbox fl" type="text" placeholder="IPhone 7"/>
+                <a class="fl" href="javascript:void(0);"><img src="static/image/search.png"/></a>
+                <br/>
+                <span class="keyword">热门搜索：关键字 关键字</span>
+            </div>
+            <div class="cart fr">
+                <div>
+                    <span>我的购物车</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pg_body">
+        <div class="w2">
+            <div class="fs_col1 fl">
+                <div class="left_menu">
+                    <div class="menu">
+                        <div class="menu_head">家用电器</div>
+                        <div class="menu_detail"><a href="javascript:void(0)">冰箱</a>/<a href="javascript:void(0)">电视</a>/<a href="javascript:void(0)">洗衣机</a></div>
+                    </div>
+                    <div class="menu">
+                        <div class="menu_head">服饰</div>
+                        <div class="menu_detail hide"><a href="javascript:void(0)">衣服</a>/<a href="javascript:void(0)">裤子</a>/<a href="javascript:void(0)">鞋子</a></div>
+                    </div>
+                    <div class="menu">
+                        <div class="menu_head">品牌</div>
+                        <div class="menu_detail hide"><a href="javascript:void(0)">耐克</a>/<a href="javascript:void(0)">阿迪达斯</a></div>
+                    </div>
+                    <div class="menu">
+                        <div class="menu_head">日用品</div>
+                        <div class="menu_detail hide"><a href="javascript:void(0)">洗发水</a>/<a href="javascript:void(0)">冲凉液</a></div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="fs_col2 fl">
+                <div class="ad"><img src="static/image/ad.jpg"></div>
+                <div>
+                    <div class="product">
+                        <div class="product_img"><a href="javascript:void(0)"><img src="static/image/phone.png"/></a></div>
+                        <div class="product_name">360手机 奇酷（QiKU）旗舰版 辰光银 移动联通电信4G手机</div>
+                        <div class="product_price"><span class="currency">&yen;</span><span class="real_price">999.00</span></div>
+                        <div class="buy"><span>-</span><input type="text" value="1"><span>+</span><a href="javascript:void(0)">买</a></div>
+                    </div>
+                    <div class="product">
+                        <div class="product_img"><a href="javascript:void(0)"><img src="static/image/baker.png"/></a></div>
+                        <div class="product_name">柏翠（petrus)面包机 全自动家用双管 智能双撒料PE8880</div>
+                        <div class="product_price"><span class="currency">&yen;</span><span class="real_price">538.00</span></div>
+                        <div class="buy"><span>-</span><input type="text" value="1"><span>+</span><a href="javascript:void(0)">买</a></div>
+                    </div>
+                    <div class="product">
+                        <div class="product_img"><a href="javascript:void(0)"><img src="static/image/children_learning_machine.png"/></a></div>
+                        <div class="product_name">蓝宝贝儿童早教机益智玩具学习机可充电下载娃娃机婴幼儿宝宝</div>
+                        <div class="product_price"><span class="currency">&yen;</span><span class="real_price">322.00</span></div>
+                        <div class="buy"><span>-</span><input type="text" value="1"><span>+</span><a href="javascript:void(0)">买</a></div>
+                    </div>
+                    <div class="product">
+                        <div class="product_img"><a href="javascript:void(0)"><img src="static/image/phone.png"/></a></div>
+                        <div class="product_name">360手机 奇酷（QiKU）旗舰版 辰光银 移动联通电信4G手机</div>
+                        <div class="product_price"><span class="currency">&yen;</span><span class="real_price">999.00</span></div>
+                        <div class="buy"><span>-</span><input type="text" value="1"><span>+</span><a href="javascript:void(0)">买</a></div>
+                    </div>
+                    <div class="product">
+                        <div class="product_img"><a href="javascript:void(0)"><img src="static/image/phone.png"/></a></div>
+                        <div class="product_name">360手机 奇酷（QiKU）旗舰版 辰光银 移动联通电信4G手机</div>
+                        <div class="product_price"><span class="currency">&yen;</span><span class="real_price">999.00</span></div>
+                        <div class="buy"><span>-</span><input type="text" value="1"><span>+</span><a href="javascript:void(0)">买</a></div>
+                    </div>
+                    <div class="product">
+                        <div class="product_img"><a href="javascript:void(0)"><img src="static/image/phone.png"/></a></div>
+                        <div class="product_name">360手机 奇酷（QiKU）旗舰版 辰光银 移动联通电信4G手机</div>
+                        <div class="product_price"><span class="currency">&yen;</span><span class="real_price">999.00</span></div>
+                        <div class="buy"><span>-</span><input type="text" value="1"><span>+</span><a href="javascript:void(0)">买</a></div>
+                    </div>
+                    <div class="product">
+                        <div class="product_img"><a href="javascript:void(0)"><img src="static/image/phone.png"/></a></div>
+                        <div class="product_name">360手机 奇酷（QiKU）旗舰版 辰光银 移动联通电信4G手机</div>
+                        <div class="product_price"><span class="currency">&yen;</span><span class="real_price">999.00</span></div>
+                        <div class="buy"><span>-</span><input type="text" value="1"><span>+</span><a href="javascript:void(0)">买</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="fs_col3 fl">
+            <div class="user_info">
+                <div><a href="javascript:void(0)"><img src="static/image/no_login.jpg"></a></div>
+                <div>
+                    <p>欢迎来到京东</p>
+                    <p>
+                        <a href="javascript:void(0)">登录</a>
+                        <a href="javascript:void(0)">注册</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+    <div class="pg_footer">
+        <div class="w2">
+            <div class="fl">
+                <h3>购物指南</h3>
+                <ul>
+                    <li>购物流程</li>
+                    <li>生活旅游</li>
+                    <li>会员介绍</li>
+                </ul>
+            </div>
+            <div class="fl">
+                <h3>配送方式</h3>
+                <ul>
+                    <li>上门自提</li>
+                    <li>211限时送达</li>
+                    <li>海外派送</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="static/js/jquery-1.12.4.min.js"></script>
+    <script>
+        cart = [];
+//        cart["测试一下的名称"] = 1;
+//        console.log(cart);
+
+        $(function () {
+            /*
+             初始化函数
+            */
+
+            // 左侧菜单的动态效果
+            $(".left_menu").delegate('.menu_head', 'click', function () {
+                $(this).siblings('.menu_detail').removeClass('hide').parent().siblings().find('.menu_detail').addClass('hide');
+            });
+
+            // 货品加减数目
+            $('.buy').delegate('span', 'click', function () {
+                var ele = $(this).siblings('input:text');
+                var old_value = ele.val();
+                old_value = isNaN(old_value)? 0 : parseInt(old_value);
+                var new_value;
+                if($(this).text() == "+"){
+                    new_value = old_value + 1;
+
+                }else{
+                    new_value = old_value - 1;
+                    new_value = new_value<0 ? 0 : new_value;
+                }
+                ele.val(new_value);
+            });
+
+            // 点击买按钮
+            $('.buy').delegate('a', 'click', function () {
+                var pname_tag = $(this).parent().siblings('.product_name');
+                var pname = pname_tag.text();
+                var num_tag = $(this).siblings('input:text');
+                var p_num = num_tag.val();
+                p_num = isNaN(p_num)? 0 : parseInt(p_num);
+                if(p_num>0){
+                    if(cart[pname]){
+                        cart[pname] += p_num;
+                    }else{
+                        cart[pname] = p_num;
+                    }
+                }
+                console.log(cart[pname]);
+                console.log(pname);
+            });
+        })
+    </script>
+</body>
+</html>

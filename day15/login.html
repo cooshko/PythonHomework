@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        body{
+            font-family: "Microsoft YaHei",serif;
+        }
+        a{
+            text-decoration: none;
+        }
+        .w{
+            width: 990px;
+            margin: 0 auto;
+        }
+        .header img{
+            vertical-align: middle;
+        }
+        .content{
+            background-color: #006736;
+        }
+        .content .banner-bg{
+            height: 475px;
+            background: url("static/image/login-banner.jpg") no-repeat;
+            position: relative;
+        }
+        .login-form{
+            position: relative;
+            display: block;
+            float: right;
+            width: 300px;
+            height: 300px;
+            background-color: white;
+            margin-top: 80px;
+            padding: 20px;
+        }
+        .login-box{
+            margin: 0 auto;
+        }
+        .login-box div{
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .need-border{
+            border: 1px solid #bdbdbd;
+        }
+        .login-label{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 38px;
+            height: 38px;
+            border-right: 1px solid #bdbdbd;
+            background: url("static/image/pwd-icons-new.png") no-repeat;
+        }
+        .password-label{
+            background: url("static/image/pwd-icons-new.png") no-repeat -48px 0;
+        }
+        .login-user-text{
+            line-height: 18px;
+            height: 18px;
+            border: 0;
+            padding: 10px 0 10px 50px;
+            width: 248px;
+            float: none;
+            overflow: hidden;
+            font-size: 14px;
+        }
+        .login-button{
+            background-color: red;
+            color: white;
+            text-align: center;
+            font-size: 20px;
+            padding: 8px;
+            width: 100%;
+            border: 0;
+        }
+        .check-msg{
+            height:20px;
+            line-height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="w">
+            <a href="jd.html"><img src="static/image/login-logo.png"></a>
+            <img src="static/image/login-welcome.png">
+        </div>
+    </div>
+    <div class="content">
+        <div class="w">
+            <div class="banner-bg">
+                <form method="post" onsubmit="return check_all()">
+                <div class="login-form">
+                    <div class="login-box">
+                        <div class="check-msg"><span></span></div>
+                        <div class="need-border">
+                            <label for="user" class="login-label"></label>
+                            <input id="user" name="user" type="text" class="login-user-text" placeholder="用户名">
+                        </div>
+                        <div class="need-border">
+                            <label for="password" class="login-label password-label"></label>
+                            <input id="password" name="password" type="password" class="login-user-text" placeholder="密码">
+                        </div>
+                        <div>
+                            <input type="checkbox" checked="checked" id="auto-login">
+                            <label for="auto-login">自动登录</label>
+                            <a href="javascript:void(0)" style="float:right; color:#bdbdbd;">忘记密码</a>
+                        </div>
+                        <div>
+                            <input type="submit" value="登 录" class="login-button">
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+    <div class="footer"></div>
+    <script src="static/js/jquery-1.12.4.min.js"></script>
+    <script>
+        function check_all() {
+            var user = $('input:text').val();
+            var password = $('input:password').val();
+            if(user && password){
+                return true;
+            }
+            var msg;
+            if(!user) msg="用户名不能为空";
+            if(!password) msg="密码不能为空";
+            if(!user && !password) msg="用户名和密码不能为空";
+            $('.check-msg span').text(msg)
+            return false;
+        }
+    </script>
+</body>
+</html>

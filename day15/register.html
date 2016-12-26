@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        body{
+            font-family: "Microsoft YaHei",serif;
+        }
+        a{
+            text-decoration: none;
+        }
+        .w{
+            width: 990px;
+            margin: 0 auto;
+        }
+        .reg-form{
+            border: 1px solid #e3e4e5;
+            border-radius: 5px;
+            margin-top: 50px;
+            padding: 20px;
+        }
+        .reg-form div{
+            margin: 0 auto;
+            width: 280px;
+            height: 42px;
+            line-height: 38px;
+            border: 1px solid #bdbdbd;
+            position: relative;
+            padding:4px;
+            margin-bottom: 20px;
+        }
+        .reg-form label{
+            margin-left: 10px;
+            width: 90px;
+        }
+        .reg-form input{
+            position: absolute;
+            border: 0 none;
+            width: 190px;
+            height: 30px;
+            line-height: 30px;
+            top: 10px;
+            left: 90px;
+            padding-left: 5px;
+            outline: none;
+        }
+        .reg-form input[type=submit]{
+            display: block;
+            background-color: red;
+            color: white;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding-left: 0;
+            font-size: 20px;
+        }
+        .alert-msg{
+            position: absolute;
+            left: 200px;
+            color: red;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header" style="border-bottom: 1px solid #e3e4e5;">
+        <div class="w">
+            <div style="height: 60px; line-height: 60px;">
+                <a href="jd.html"><img src="static/image/login-logo.png" style="vertical-align: top;"></a>
+                <span style="font-size: 2em;">欢迎注册</span>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <div class="w">
+            <div class="reg-form">
+                <form onsubmit="return check_all()">
+                    <div>
+                        <label>用 户 名</label>
+                        <input type="text" name="user" id="user" placeholder="新用户登录名" alert="用户名格式错误" autocomplete="off">
+                        <span class="alert-msg"></span>
+                    </div>
+                    <div>
+                        <label>邮  箱</label>
+                        <input type="email" name="email" id="email" placeholder="邮箱" alert="邮箱格式不对">
+                        <span class="alert-msg"></span>
+                    </div>
+                    <div>
+                        <label>密  码</label>
+                        <input type="password" name="password" id="password" placeholder="密码" alert="密码不能为空">
+                        <span class="alert-msg"></span>
+                    </div>
+                    <div>
+                        <label>确认密码</label>
+                        <input type="password" name="confirm_password" id="confirm_password" placeholder="确认密码" alert="两次密码不一致">
+                        <span class="alert-msg"></span>
+                    </div>
+                    <div>
+                        <input type="submit" value="提 交">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="footer"></div>
+    <script src="static/js/jquery-1.12.4.min.js"></script>
+    <script>
+        function check_all() {
+            clear_alert();
+            var ret = true;
+            var user = $('#user').val();
+            if(user.length == 0 ){
+                ret = false;
+                show_alert($('#user'));
+            }
+
+            var email = $('#email').val();
+            var isEmail = /\w+@\w+\.\w+/.test(email);
+            if(!isEmail){
+                ret = false;
+                show_alert($('#email'));
+            }
+
+            var password = $('#password').val();
+            if(password.length == 0){
+                ret = false;
+                show_alert($('#password'));
+            }
+
+            var confirm_password = $('#confirm_password').val();
+            if(confirm_password != password){
+                ret = false;
+                show_alert($('#confirm_password'));
+            }
+            return ret;
+        }
+        function clear_alert() {
+            $('.reg-form span').text("");
+        }
+        function show_alert(e) {
+            var msg = e.attr('alert');
+            e.siblings('span').text(msg);
+        }
+    </script>
+</body>
+</html>

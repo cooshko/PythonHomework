@@ -57,12 +57,26 @@
             text-align: center;
             vertical-align: middle;
             background-color: #e3e4e5;
+            cursor: pointer;
         }
         .cart span{
             line-height: 33px;
         }
         .cart img{
             vertical-align: middle;
+        }
+        .mycart{
+            float: left;
+            border: 1px solid #e3e4e5;
+            margin-top:33px;
+            background-color: white !important;
+            width: 300px !important;
+            height: 150px !important;
+            z-index:10;
+            padding: 10px;
+        }
+        .mycart td{
+            text-align: left;
         }
         .keyword{
             color: #999;
@@ -219,7 +233,7 @@
             margin-left: 6px;
         }
         .hide{
-            display: none;
+            display: none !important;
         }
         .currency{
             font-size: 8px;
@@ -237,8 +251,8 @@
     <div class="pg_shorcut">
         <div class="w2">
             <ul>
-                <li>登录</li>
-                <li>注册</li>
+                <li><a href="login.html">登录</a></li>
+                <li><a href="register.html">注册</a></li>
                 <li>我的订单</li>
                 <li>我的收藏</li>
                 <li>VIP会员俱乐部</li>
@@ -259,9 +273,13 @@
             </div>
             <div class="cart fr">
                 <div>
-                    <span>我的购物车</span>
+                    <span class="cart_head">我的购物车</span>
+                </div>
+                <div class="mycart hide">
+                    购物车空空如也
                 </div>
             </div>
+
         </div>
     </div>
     <div class="pg_body">
@@ -341,8 +359,8 @@
                 <div>
                     <p>欢迎来到京东</p>
                     <p>
-                        <a href="javascript:void(0)">登录</a>
-                        <a href="javascript:void(0)">注册</a>
+                        <a href="login.html">登录</a>
+                        <a href="register.html">注册</a>
                     </p>
                 </div>
             </div>
@@ -371,9 +389,35 @@
     </div>
     <script src="static/js/jquery-1.12.4.min.js"></script>
     <script>
-        cart = [];
-//        cart["测试一下的名称"] = 1;
-//        console.log(cart);
+        var cart=[];
+        function rebuild_cart() {
+            var count = 0;
+            var outHTML = "购物车空空如也";
+            var t = document.createElement('table');
+            var total_price = 0;
+            for(var key in cart){
+                count++;
+                var tr = document.createElement('tr');
+                var td1 = document.createElement('td');
+                var td2 = document.createElement('td');
+                td1.innerText=key;
+                td2.innerText="x" + cart[key]['num'].toString();
+                total_price += cart[key]['price'];
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                t.appendChild(tr);
+            }
+            if(count>0){
+                var total_price_tr = document.createElement('tr');
+                var total_price_td = document.createElement('td');
+                total_price_td.colSpan=2;
+                total_price_td.innerText = "总价格：" + total_price;
+                total_price_tr.appendChild(total_price_td);
+                t.appendChild(total_price_tr);
+                outHTML = t.outerHTML;
+            }
+            $('.mycart').html(outHTML);
+        }
 
         $(function () {
             /*
@@ -408,16 +452,37 @@
                 var num_tag = $(this).siblings('input:text');
                 var p_num = num_tag.val();
                 p_num = isNaN(p_num)? 0 : parseInt(p_num);
+                var p_price = parseFloat($(this).parent().siblings('.product_price').children('.real_price').text()) * parseInt(p_num);
                 if(p_num>0){
                     if(cart[pname]){
-                        cart[pname] += p_num;
+                        cart[pname]['num'] += p_num;
+                        cart[pname]['price'] += p_price;
                     }else{
-                        cart[pname] = p_num;
+                        cart[pname] = [];
+                        cart[pname]['num'] = p_num;
+                        cart[pname]['price'] = p_price;
                     }
                 }
-                console.log(cart[pname]);
-                console.log(pname);
+                rebuild_cart();
             });
+
+            // 展示购物车
+            $('.cart_head').parent().hover(
+                    function () {
+                        $('.mycart').removeClass('hide');
+                    },
+                    function () {
+                        $('.mycart').addClass('hide');
+                    }
+            );
+            $('.mycart').hover(
+                    function () {
+                        $('.mycart').removeClass('hide');
+                    },
+                    function () {
+                        $('.mycart').addClass('hide');
+                    }
+            );
         })
     </script>
 </body>

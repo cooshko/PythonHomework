@@ -22,7 +22,7 @@ def get_all_books(request, start=0, limit=5):
             'catalog': str(book.catalog),
             # 'create_time': book.create_time,
             # 'update_time': book.update_time,
-            # 'authors': book.authors,
+            'authors': book.authors.all().values_list('name'),
         }
         all_book.append(temp)
     return HttpResponse(json.dumps(all_book))

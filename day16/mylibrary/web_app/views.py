@@ -21,8 +21,8 @@ def get_all_books(request, start=0, limit=5):
             'description': str(book.description),
             'catalog': str(book.catalog),
             # 'create_time': book.create_time,
-            # 'update_time': book.update_time,
-            'authors': book.authors.all().values_list('name'),
+            'update_time': str(book.update_time),
+            'authors': list(book.authors.all().values('name')),
         }
         all_book.append(temp)
     return HttpResponse(json.dumps(all_book))

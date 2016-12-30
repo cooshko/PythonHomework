@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^$', views.index),
     url(r'get-all-books/', views.get_all_books),
     url(r'demo-add/', views.demo_add),
+    url(r'add_book/', views.add_book),
 ]
 
 

@@ -3,8 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <title>图书管理</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        body{
+            font-family: "Microsoft YaHei", "微软雅黑", serif;
+        }
+        a{
+            text-decoration: none;
+        }
+        hr{
+            margin:2px 0;
+        }
+        .fl{
+            float: left;
+        }
+        .hide{
+            display: none;
+        }
+        .header{
+            height: 80px;
+            background-color: skyblue;
+            position: relative;
+        }
+        .header .search_box{
+            border: 1px solid deepskyblue;
+            position: absolute;
+            display: block;
+            right: 80px;
+            bottom:20px;
+        }
+        .header .site_title{
+            position: absolute;
+            left:100px;
+            bottom: 20px;
+            font-size: 32px;
+        }
+        #search_keyword{
+            border: 1px solid deepskyblue;
+            height: 24px;
+            width: 180px;
+            line-height: 14px;
+            padding-left: 8px;
+            outline:none;
+        }
+        .search_btn{
+            display: block;
+            width:24px;
+            height:24px;
+            line-height: 24px;
+            border: 1px solid deepskyblue;
+            text-align: center;
+            background-color: deepskyblue;
+            font-size: 12px;
+        }
+         .clearfix:after{
+            content: ".";
+            clear: both;
+            display: block;
+            visibility: hidden;
+            height: 0;
+        }
+        .left-menu{
+            position: absolute;
+            width:160px;
+            top: 80px;
+            bottom:0;
+            border: 1px solid lightgray;
+            border-top: 0;
+        }
+        .menu-item-head{
+            padding: 8px 18px;
+            font-weight: bold;
+            border:1px dashed gray;
+            background-color: lightsteelblue;
+        }
+        .menu-item-detail li{
+            display: block;
+            padding: 1px 28px;
+        }
+        .left-menu a{
+            display: block;
+        }
+        .menu-item-detail li:hover{
+            background-color: lightsteelblue;
+        }
+        .footer{
+            position: absolute;
+            bottom:0;
+            height:30px;
+            width: 100%;
+            background-color: lightsteelblue;
+            display: none;
+        }
+        .content{
+            position: absolute;
+            left:162px;
+            top:80px;
+            bottom:0;
+            padding: 20px;
+            width:990px;
+            overflow: auto;
+        }
+        .book-box{
+            display: block;
+            padding: 0 18px;
+            margin: 18px;
+            width:160px;
+        }
+        .book-box *{
+            text-align: center;
+        }
+        .book-box img{
+            width:140px;
+            height:200px;
+        }
+        .book-box-edit-btn{
+            visibility: hidden;
+            vertical-align: text-top;
+            height:20px;
+            line-height: 20px;
+        }
+        .book-name{
+            height:40px;
+            overflow: hidden;
+            font-size: 14px;
+        }
+        .recent{
+            position: relative;
+        }
+        .shelter{
+            position: fixed;
+            background-color: rgba(0,0,0,.4);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .add_book_box{
+            border: 2px solid gray;
+            display: block;
+            position: absolute;
+            width: 650px;
+            height: 400px;
+            background-color: white;
+            top: 50%;
+            left: 50%;
+            margin-left: -327px;
+            margin-top: -202px;
+        }
+        .add_book_box table{
+
+        }
+    </style>
+
 </head>
 <body>
-    首页
+    <div class="header">
+        <span class="site_title">图书管理</span>
+        <div class="search_box">
+            <input type="text" name="search_keyword" id="search_keyword" placeholder="搜索书名" class="fl">
+            <a href="javascript:void(0);" class="search_btn fl">搜</a>
+        </div>
+    </div>
+    <div class="pg-body clearfix">
+        <div class="left-menu fl">
+            <div class="menu-item">
+                <div class="menu-item-head">
+                    <a href="/web/">首页</a>
+                </div>
+            </div>
+            <div class="menu-item">
+                <div class="menu-item-head">
+                    <a href="javascript:void(0);" onclick="show_add_book_box()">添加书籍</a>
+                </div>
+            </div>
+            <div class="menu-item">
+                <div class="menu-item-head">
+                    分类
+                </div>
+                <div class="menu-item-detail">
+                    <ul>
+                        <li><a href="#">分类一</a></li>
+                        <li><a href="#">分类二</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="content clearfix">
+            <div class="recent clearfix">
+                <span>最近添加</span>
+                <hr/>
+                <div class="book-box fl">
+                    <a href="#">
+                        <div>
+                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
+                        </div>
+                        <div class="book-name">
+                            <span>CCNP SWITCH学习指南</span>
+                        </div>
+                        <div class="book-box-edit-btn">
+                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="book-gallery">
+                <span>书架</span>
+                <hr/>
+                <!--以下是重复的内容-->
+
+                <div class="book-box fl">
+                    <a href="#">
+                        <div>
+                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
+                        </div>
+                        <div class="book-name">
+                            <span>CCNP SWITCH学习指南</span>
+                        </div>
+                        <div class="book-box-edit-btn">
+                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
+                        </div>
+                    </a>
+                </div>
+                <div class="book-box fl">
+                    <a href="#">
+                        <div>
+                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
+                        </div>
+                        <div class="book-name">
+                            <span>CCNP SWITCH学习指南</span>
+                        </div>
+                        <div class="book-box-edit-btn">
+                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
+                        </div>
+                    </a>
+                </div>
+                <div class="book-box fl">
+                    <a href="#">
+                        <div>
+                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
+                        </div>
+                        <div class="book-name">
+                            <span>CCNP SWITCH学习指南</span>
+                        </div>
+                        <div class="book-box-edit-btn">
+                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
+                        </div>
+                    </a>
+                </div>
+                <div class="book-box fl">
+                    <a href="#">
+                        <div>
+                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
+                        </div>
+                        <div class="book-name">
+                            <span>CCNP SWITCH学习指南</span>
+                        </div>
+                        <div class="book-box-edit-btn">
+                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
+                        </div>
+                    </a>
+                </div>
+                <div class="book-box fl">
+                    <a href="#">
+                        <div>
+                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
+                        </div>
+                        <div class="book-name">
+                            <span>CCNP SWITCH学习指南</span>
+                        </div>
+                        <div class="book-box-edit-btn">
+                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
+                        </div>
+                    </a>
+                </div>
+                <!--以上是重复的内容-->
+            </div>
+        </div>
+    </div>
+        <div id="shelter" class="shelter">
+        <div class="add_book_box">
+            <form method="get" onsubmit="return false;">
+                <table>
+                    <tr>
+                        <td>类目</td>
+                        <td>
+                            <select name="catalog_list">
+                                {% for c in catalog_list %}
+                                <option value="{{c.id}}">{{c.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>书名</td>
+                        <td><input id="name" type="text" name="name"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>版次</td>
+                        <td><input id="version" type="text" name="version"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>作者</td>
+                        <td><input id="authors[0]" type="text" name="authors[]" placeholder="多个作者请用空格分隔"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>出版社</td>
+                        <td>
+                            <select name="publisher">
+                                {% for p in publisher_list %}
+                                <option value="{{p.id}}">{{p.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>封面</td>
+                        <td><input id="cover" type="file" name="cover"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>说明</td>
+                        <td><textarea id="description" name="description"></textarea></td>
+                        <td></td>
+                    </tr>
+                </table>
+                <div>
+                    <input type="submit" value="提交" onclick="ajax_add();">
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <script>
+        $(
+                function () {
+                    $('.content').delegate('.book-box','mouseover',function () {
+                        $(this).children('.book-box-edit-btn').css('visibility', 'visible');
+                    });
+                    $('.content').delegate('.book-box','mouseout',function () {
+                        $(this).children('.book-box-edit-btn').css('visibility', 'hidden');
+                    });
+                }
+        );
+
+        shelter=document.getElementById("shelter");
+        function hide_shelter() {
+            shelter.classList.add("hide")
+        }
+        function show_add_book_box(){
+            // 展示遮罩层
+            show_shelter();
+            // 展示添加框
+
+        }
+        function show_shelter() {
+            shelter.classList.remove("hide");
+            return false;
+        }
+
+        function ajax_add() {
+            // 通过ajax把数据post到服务器
+
+        }
+    </script>
 </body>
 </html>

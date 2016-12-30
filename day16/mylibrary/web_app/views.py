@@ -6,7 +6,12 @@ from web_app import models
 
 # Create your views here.
 def index(request):
-    return render(request, 'index.html')
+    publisher_list = get_publishers()
+    catalog_list = get_catalog()
+    return render(request, 'index.html', {
+        'publisher_list': publisher_list,
+        'catalog_list': catalog_list,
+    })
 
 
 def get_all_books(request, start=0, limit=5):
@@ -52,3 +57,35 @@ def demo_add(request):
     return HttpResponse('OK')
 
 
+def get_publishers(request=None):
+    """
+    获取出版社信息
+    :param request:
+    :return:
+    """
+    if request:
+        # 保留功能
+        pass
+    else:
+        ret = list(models.PublisherInfo.objects.all().values())
+    return ret
+
+
+def get_catalog(request=None):
+    """
+    获取类目信息
+    :param request:
+    :return:
+    """
+    if request:
+        # 保留功能
+        pass
+    else:
+        ret = list(models.CatalogInfo.objects.all().values())
+    return ret
+
+
+def add_book(request):
+    if request.method == 'POST':
+        data = request.POST
+    return

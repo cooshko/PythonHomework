@@ -29,7 +29,6 @@ class BookInfo(MyCommon, models.Model):
     update_time = models.DateTimeField(auto_now=True)       # 修改时间
     authors = models.ManyToManyField(AuthorInfo)            # 作者信息（多对多，一本书可以多个作者，一个作者可以有多本书）
 
-
 class CatalogInfo(MyCommon, models.Model):
     # 图书分类
     name = models.CharField(max_length=64, unique=True)

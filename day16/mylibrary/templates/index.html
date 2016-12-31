@@ -154,8 +154,8 @@
             margin-left: -327px;
             margin-top: -202px;
         }
-        .add_book_box table{
-
+        .add_book_box img{
+            max-height:140px;
         }
     </style>
 
@@ -200,10 +200,10 @@
                 <div class="book-box fl">
                     <a href="#">
                         <div>
-                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
+                            <img src="{{recent.cover}}"/>
                         </div>
                         <div class="book-name">
-                            <span>CCNP SWITCH学习指南</span>
+                            <span>{{recent.name}}</span>
                         </div>
                         <div class="book-box-edit-btn">
                             <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
@@ -215,138 +215,104 @@
                 <span>书架</span>
                 <hr/>
                 <!--以下是重复的内容-->
-
+                {% for book in books %}
                 <div class="book-box fl">
                     <a href="#">
                         <div>
-                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
+                            <img src="{{book.cover}}"/>
                         </div>
                         <div class="book-name">
-                            <span>CCNP SWITCH学习指南</span>
+                            <span>{{book.name}}</span>
                         </div>
                         <div class="book-box-edit-btn">
                             <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
                         </div>
                     </a>
                 </div>
-                <div class="book-box fl">
-                    <a href="#">
-                        <div>
-                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
-                        </div>
-                        <div class="book-name">
-                            <span>CCNP SWITCH学习指南</span>
-                        </div>
-                        <div class="book-box-edit-btn">
-                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
-                        </div>
-                    </a>
-                </div>
-                <div class="book-box fl">
-                    <a href="#">
-                        <div>
-                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
-                        </div>
-                        <div class="book-name">
-                            <span>CCNP SWITCH学习指南</span>
-                        </div>
-                        <div class="book-box-edit-btn">
-                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
-                        </div>
-                    </a>
-                </div>
-                <div class="book-box fl">
-                    <a href="#">
-                        <div>
-                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
-                        </div>
-                        <div class="book-name">
-                            <span>CCNP SWITCH学习指南</span>
-                        </div>
-                        <div class="book-box-edit-btn">
-                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
-                        </div>
-                    </a>
-                </div>
-                <div class="book-box fl">
-                    <a href="#">
-                        <div>
-                            <img src="/static/book-gallery/CCNP SWITCH学习指南.png"/>
-                        </div>
-                        <div class="book-name">
-                            <span>CCNP SWITCH学习指南</span>
-                        </div>
-                        <div class="book-box-edit-btn">
-                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
-                        </div>
-                    </a>
-                </div>
+                {% endfor %}
                 <!--以上是重复的内容-->
             </div>
         </div>
     </div>
-        <div id="shelter" class="shelter">
-        <div class="add_book_box">
-            <form id="add_book_form" method="post" enctype="multipart/form-data" onsubmit="return false;">
-                <table>
-                    <tr>
-                        <td>类目</td>
-                        <td>
-                            <select name="catalog_list">
-                                {% for c in catalog_list %}
-                                <option value="{{c.id}}">{{c.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>书名</td>
-                        <td><input id="name" type="text" name="name"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>版次</td>
-                        <td><input id="version" type="text" name="version"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>作者</td>
-                        <td><input id="authors" type="text" name="authors" placeholder="多个作者请用空格分隔"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>出版社</td>
-                        <td>
-                            <select name="publisher">
-                                {% for p in publisher_list %}
-                                <option value="{{p.id}}">{{p.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>封面</td>
-                        <td>
-                            <div></div>
-                            <button onclick="$('#cover').click();">上传图片</button>
-                            <input id="cover" name="cover" type="file" data-url="upload_cover/" style="display: none;">
-                            <input id="cover_uri" name="cover_uri" type="hidden">
-                        </td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>说明</td>
-                        <td><textarea id="description" name="description"></textarea></td>
-                        <td></td>
-                    </tr>
-                </table>
-                <div>
-                    <input type="hidden" name="action" value="add_book">
-                    <input type="submit" value="提交" onclick="ajax_edit();">
-                </div>
-            </form>
+        <div id="shelter" class="shelter hide">
+        <div class="add_book_box hide">
+            <div style="text-align: right;">
+                <a href="#" onclick="close_add_book()">[ 关闭 ]</a>
+                <script>
+                    function close_add_book() {
+                        var form = $('#add_book_form')[0];
+                        form.reset();
+                        $('#cover_uri').val("");
+                        $('#add_book_box').addClass('hide');
+                        $('#shelter').addClass('hide');
+                    }
+                </script>
+            </div>
+            <div style="width: 250px; margin: 0 auto;">
+                <form id="add_book_form" method="post" enctype="multipart/form-data" onsubmit="return false;">
+                    <table>
+                        <tr>
+                            <td>类目</td>
+                            <td>
+                                <select name="catalog">
+                                    {% for c in catalog_list %}
+                                    <option value="{{c.id}}">{{c.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>书名</td>
+                            <td><input id="name" type="text" name="name"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>版次</td>
+                            <td><input id="version" type="text" name="version"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>作者</td>
+                            <td><input id="authors" type="text" name="authors" placeholder="多个作者请用空格分隔"></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>出版社</td>
+                            <td>
+                                <select name="publisher" required>
+                                    <option></option>
+                                    {% for p in publisher_list %}
+                                    <option value="{{p.id}}">{{p.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>封面</td>
+                            <td>
+                                <div></div>
+                                <button onclick="$('#cover').click();">上传图片</button>
+                                <input id="cover" name="cover" type="file" data-url="upload_cover/" style="display: none;">
+                                <input id="cover_uri" name="cover_uri" type="hidden">
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>说明</td>
+                            <td><textarea id="description" name="description"></textarea></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    <div>
+                        <input type="hidden" name="action" value="add_book">
+                        <input type="submit" value="提交" onclick="ajax_edit();">
+                    </div>
+                </form>
+                <span id="feedback_span"></span>
+            </div>
+
         </div>
     </div>
     <script src="/static/js/jquery-1.12.4.min.js"></script>
@@ -361,11 +327,6 @@
                     $('.content').delegate('.book-box','mouseout',function () {
                         $(this).children('.book-box-edit-btn').css('visibility', 'hidden');
                     });
-//                    $('#cover').change(
-//                        function () {
-//
-//                        }
-//                    );
 
                     // 上传封面图片
                     $('#cover').fileupload(
@@ -377,6 +338,7 @@
                                     img.src=data.result[1];
                                     $('#cover_uri').val(data.result[1]);
                                     var poster = $(this).siblings('div');
+                                    poster.children().remove();
                                     poster.append($(img));
                                 }else{
                                     var span = document.createElement('span');
@@ -412,7 +374,9 @@
             $.post({
                 url: 'edit_book/',
                 data: $('#add_book_form').serialize(),
+                dataType: 'json',
                 success: function (response) {
+//                    $('feedback_span').text(response.result[1]);
                     console.log(response);
                 }
             });

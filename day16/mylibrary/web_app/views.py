@@ -1,40 +1,62 @@
 from django.shortcuts import render, HttpResponse, redirect
+from django.db.utils import IntegrityError
 import json, os, hashlib
 # from day16.mylibrary.web_app import models
 from web_app import models
 from mylibrary import settings
 from PIL import Image
 
+
 def redirect_index(request):
     return redirect("/web/")
 
 
 def index(request):
+    recent = get_recent()
+    books = get_books()
     publisher_list = get_publishers()
     catalog_list = get_catalog()
     return render(request, 'index.html', {
+        'recent': recent,
+        'books': books,
         'publisher_list': publisher_list,
         'catalog_list': catalog_list,
     })
 
 
-def get_all_books(request, start=0, limit=5):
-    all_book = []
-    # print(models.BookInfo.objects.all().values())
-    for book in models.BookInfo.objects.all():
-        temp = {
-            'name': str(book.name),
-            'publisher': str(book.publisher),
-            'version': str(book.version),
-            'cover': str(book.cover),
-            'description': str(book.description),
-            'catalog': str(book.catalog),
-            # 'create_time': book.create_time,
-            'update_time': str(book.update_time),
-            'authors': list(book.authors.all().values('name')),
-        }
-        all_book.append(temp)
-    return HttpResponse(json.dumps(all_book))
+def get_recent():
+    """
+    获取最近添加的书
+    :return:
+    """
+    recent = models.BookInfo.objects.all().order_by('-create_time').first()
+    return recent
+
+
+def get_books(page=0, limit=5):
+    """
+    获取书的信息，但一次默认只能获取5本
+    :param page:
+    :param limit:
+    :return:
+    """
+    offset = page * limit
+    books = models.BookInfo.objects.all()[offset:offset + limit]
+    return books
+    # books = []
+    # for book in models.BookInfo.objects.all():
+    #     temp = {
+    #         'name': str(book.name),
+    #         'publisher': str(book.publisher),
+    #         'version': str(book.version),
+    #         'cover': str(book.cover),
+    #         'description': str(book.description),
+    #         'catalog': str(book.catalog),
+    #         # 'create_time': book.create_time,
+    #         'update_time': str(book.update_time),
+    #         'authors': list(book.authors.all().values('name')),
+    #     }
+    #     books.append(temp)
 
 
 # def demo_add(request):
@@ -97,13 +119,17 @@ def edit_book(request):
     """
     func_map = {
         'add_book': add_book,
+        'del_book': del_book,
+        'modify_book': modify_book,
     }
     if request.method == 'POST':
         data = request.POST
-        action = data['action']
-        authors = data['authors'].split()
-
-    return
+        action = data.get('action')
+        if action in func_map:
+            ret = func_map[action](data)
+        else:
+            ret = False, "没有此方法"
+        return HttpResponse(json.dumps(ret))
 
 
 def upload_cover(request):
@@ -162,8 +188,52 @@ def add_publisher(iName):
         ret = (False, "iName不能为空")
     return ret
 
+
 def add_book(data):
-    pass
+    try:
+        new_book = models.BookInfo()
+        new_book.name = data.get('name')
+        new_book.version = data.get('version')
+        new_book.cover = data.get('cover_uri')
+        new_book.description = data.get('description')
+
+        # 外键的处理
+        catalog_id = data.get('catalog')
+        new_book.catalog = models.CatalogInfo.objects.filter(id=catalog_id).first()
+        publisher_id = data.get('publisher')
+        new_book.publisher = models.PublisherInfo.objects.filter(id=publisher_id).first()
+
+        # 先保存一下
+        new_book.save()
+
+        # 检查作者是否已经存在
+        authors_str = data.get('authors')
+        authors = None
+        author_obj_list = []
+        if authors_str:
+            authors_str = authors_str.strip()
+            if authors_str:
+                authors = authors_str.split()
+                for author in authors:
+                    author_obj = models.AuthorInfo.objects.filter(name=author).first()
+                    if author_obj:
+                        author_obj_list.append(author_obj)
+                    else:
+                        new_author = models.AuthorInfo()
+                        new_author.name = author
+                        new_author.save()
+                        author_obj_list.append(new_author)
+        for author_obj in author_obj_list:
+            new_book.authors.add(author_obj)
+        ret = True, "保存成功！"
+        return json.dumps(ret)
+    except IntegrityError as e:
+        if str(e).startswith('UNIQUE constraint failed'):
+            ret = False, "该书名已存在，不能重复创建"
+        else:
+            ret = False, str(e)
+        return json.dumps(ret)
+
 
 def del_book(data):
     pass

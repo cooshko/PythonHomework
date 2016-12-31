@@ -287,7 +287,7 @@
     </div>
         <div id="shelter" class="shelter">
         <div class="add_book_box">
-            <form method="get" onsubmit="return false;">
+            <form id="add_book_form" method="post" enctype="multipart/form-data" onsubmit="return false;">
                 <table>
                     <tr>
                         <td>类目</td>
@@ -312,7 +312,7 @@
                     </tr>
                     <tr>
                         <td>作者</td>
-                        <td><input id="authors[0]" type="text" name="authors[]" placeholder="多个作者请用空格分隔"></td>
+                        <td><input id="authors" type="text" name="authors" placeholder="多个作者请用空格分隔"></td>
                         <td></td>
                     </tr>
                     <tr>
@@ -328,7 +328,12 @@
                     </tr>
                     <tr>
                         <td>封面</td>
-                        <td><input id="cover" type="file" name="cover"></td>
+                        <td>
+                            <div></div>
+                            <button onclick="$('#cover').click();">上传图片</button>
+                            <input id="cover" name="cover" type="file" data-url="upload_cover/" style="display: none;">
+                            <input id="cover_uri" name="cover_uri" type="hidden">
+                        </td>
                         <td></td>
                     </tr>
                     <tr>
@@ -338,12 +343,15 @@
                     </tr>
                 </table>
                 <div>
-                    <input type="submit" value="提交" onclick="ajax_add();">
+                    <input type="hidden" name="action" value="add_book">
+                    <input type="submit" value="提交" onclick="ajax_edit();">
                 </div>
             </form>
         </div>
     </div>
     <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <script src="/static/js/jquery.ui.widget.js"></script>
+    <script src="/static/js/jquery.fileupload.js"></script>
     <script>
         $(
                 function () {
@@ -353,6 +361,30 @@
                     $('.content').delegate('.book-box','mouseout',function () {
                         $(this).children('.book-box-edit-btn').css('visibility', 'hidden');
                     });
+//                    $('#cover').change(
+//                        function () {
+//
+//                        }
+//                    );
+
+                    // 上传封面图片
+                    $('#cover').fileupload(
+                        {
+                            dataType: 'json',
+                            done: function (e, data) {
+                                if(data.result[0]==true){
+                                    var img = document.createElement('img');
+                                    img.src=data.result[1];
+                                    $('#cover_uri').val(data.result[1]);
+                                    var poster = $(this).siblings('div');
+                                    poster.append($(img));
+                                }else{
+                                    var span = document.createElement('span');
+                                    span.innerText=data.result[1];
+                                }
+                            }
+                        }
+                    );
                 }
         );
 
@@ -371,9 +403,20 @@
             return false;
         }
 
-        function ajax_add() {
-            // 通过ajax把数据post到服务器
+//        function upload_cover(ele) {
+//            console.log(ele)
+//        }
 
+        function ajax_edit() {
+            // 通过ajax把数据post到服务器
+            $.post({
+                url: 'edit_book/',
+                data: $('#add_book_form').serialize(),
+                success: function (response) {
+                    console.log(response);
+                }
+            });
+//            console.log($('#add_book_form').serialize());
         }
     </script>
 </body>

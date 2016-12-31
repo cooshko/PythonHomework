@@ -7,8 +7,9 @@ from web_app import views
 urlpatterns = [
     url(r'^$', views.index),
     url(r'get-all-books/', views.get_all_books),
-    url(r'demo-add/', views.demo_add),
-    url(r'add_book/', views.add_book),
+    # url(r'demo-add/', views.demo_add),
+    url(r'edit_book/', views.edit_book),
+    url(r'upload_cover/', views.upload_cover),
 ]
 
 

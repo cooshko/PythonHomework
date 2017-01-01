@@ -6,6 +6,9 @@ from web_app import models
 from mylibrary import settings
 from PIL import Image
 
+# 用于分页功能，限制每页显示多少条数据
+LIMIT_PER_PAGE = 10
+AUTHORS_SEP = r'|'
 
 def redirect_index(request):
     return redirect("/web/")
@@ -24,6 +27,16 @@ def index(request):
     })
 
 
+def get_bookshelves(request, page=1):
+    """
+    ajax获取书架分页内容
+    :param request:
+    :param page:
+    :return:
+    """
+    pass
+
+
 def get_recent():
     """
     获取最近添加的书
@@ -33,7 +46,21 @@ def get_recent():
     return recent
 
 
-def get_books(page=0, limit=5):
+def get_book_detail(request, book_id):
+    """
+    查询指定书的详情
+    :param request:
+    :param book_id:
+    :return:
+    """
+    book_id = int(book_id)
+    book = models.BookInfo.objects.filter(id=book_id).first()
+    authors = [x[0] for x in book.authors.values_list('name')]
+    authors_str = ", ".join(authors)
+    return render(request, 'book-detail.html', {'book': book, 'authors': authors_str})
+
+
+def get_books(page=0, limit=LIMIT_PER_PAGE):
     """
     获取书的信息，但一次默认只能获取5本
     :param page:
@@ -111,7 +138,7 @@ def get_catalog(request=None):
     return ret
 
 
-def edit_book(request):
+def edit_book(request, iBook_id=None):
     """
     编辑书本信息，包括了增删改
     :param request:
@@ -130,6 +157,19 @@ def edit_book(request):
         else:
             ret = False, "没有此方法"
         return HttpResponse(json.dumps(ret))
+    elif request.method == 'GET' and iBook_id:
+        iBook_id = int(iBook_id)
+        catalog_list = get_catalog()
+        publishers_list = get_publishers()
+        book = models.BookInfo.objects.filter(id=iBook_id).first()
+        authors = [x[0] for x in book.authors.values_list('name')]
+        authors_str = "|".join(authors)
+        return render(request, 'book-edit.html', {
+            'book': book,
+            'authors': authors_str,
+            'catalog_list': catalog_list,
+            'publisher_list': publishers_list,
+        })
 
 
 def upload_cover(request):
@@ -213,7 +253,7 @@ def add_book(data):
         if authors_str:
             authors_str = authors_str.strip()
             if authors_str:
-                authors = authors_str.split()
+                authors = authors_str.split(AUTHORS_SEP)
                 for author in authors:
                     author_obj = models.AuthorInfo.objects.filter(name=author).first()
                     if author_obj:
@@ -236,7 +276,49 @@ def add_book(data):
 
 
 def del_book(data):
-    pass
+    book_id = data.get('id')
+    models.BookInfo.objects.filter(id=book_id).delete()
+    return True, "删除成功！"
+
 
 def modify_book(data):
-    pass
+    catalog_id = data.get('catalog')
+    catalog = models.CatalogInfo.objects.filter(id=catalog_id).first()
+    publisher_id = data.get('publisher')
+    publisher = models.PublisherInfo.objects.filter(id=publisher_id).first()
+    book = models.BookInfo.objects.filter(id=data.get('book_id')).first()
+    book.name = data.get('name')
+    book.version = data.get('version')
+    book.cover = data.get('cover_uri')
+    book.description = data.get('description')
+    book.catalog = catalog
+    book.publisher = publisher
+    book.save()
+    author_list = data.get('authors').split(AUTHORS_SEP)
+    for author_str in author_list:
+        author = get_author(name=author_str)
+        book.authors.add(author)
+    return True, "修改成功"
+
+
+def get_author(request=None, id=None, name=None):
+    """
+    获取author对象，如果不存在则创建author并返回
+    :param request:
+    :param id:
+    :param name:
+    :return:
+    """
+    author = None
+    if request:
+        pass
+    else:
+        if id:
+            author = models.AuthorInfo.objects.filter(id=id).first()
+        elif name:
+            author = models.AuthorInfo.objects.filter(name=name).first()
+            if not author:
+                author = models.AuthorInfo()
+                author.name = name
+                author.save()
+        return author

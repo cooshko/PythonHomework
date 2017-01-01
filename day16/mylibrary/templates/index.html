@@ -21,7 +21,7 @@
             float: left;
         }
         .hide{
-            display: none;
+            display: none !important;
         }
         .header{
             height: 80px;
@@ -117,7 +117,7 @@
             text-align: center;
         }
         .book-box img{
-            width:140px;
+            /*max-width:140px;*/
             height:200px;
         }
         .book-box-edit-btn{
@@ -142,17 +142,23 @@
             right: 0;
             bottom: 0;
         }
-        .add_book_box{
+        .dialog{
             border: 2px solid gray;
             display: block;
             position: absolute;
             width: 650px;
-            height: 400px;
+            /*height: 600px;*/
             background-color: white;
             top: 50%;
             left: 50%;
             margin-left: -327px;
-            margin-top: -202px;
+            margin-top: -302px;
+            z-index: 10;
+            overflow: auto;
+            padding:20px;
+        }
+        .dialog td{
+            min-width:80px;
         }
         .add_book_box img{
             max-height:140px;
@@ -163,7 +169,7 @@
 <body>
     <div class="header">
         <span class="site_title">图书管理</span>
-        <div class="search_box">
+        <div class="search_box hide">
             <input type="text" name="search_keyword" id="search_keyword" placeholder="搜索书名" class="fl">
             <a href="javascript:void(0);" class="search_btn fl">搜</a>
         </div>
@@ -180,7 +186,7 @@
                     <a href="javascript:void(0);" onclick="show_add_book_box()">添加书籍</a>
                 </div>
             </div>
-            <div class="menu-item">
+            <div class="menu-item hide">
                 <div class="menu-item-head">
                     分类
                 </div>
@@ -198,7 +204,7 @@
                 <span>最近添加</span>
                 <hr/>
                 <div class="book-box fl">
-                    <a href="#">
+                    <a href="#" onclick="show_book_detail({{recent.id}})">
                         <div>
                             <img src="{{recent.cover}}"/>
                         </div>
@@ -206,7 +212,7 @@
                             <span>{{recent.name}}</span>
                         </div>
                         <div class="book-box-edit-btn">
-                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
+                            <a href="javascript:void(0);" onclick="show_book_detail({{recent.id}})">查看</a> | <a href="javascript:void(0);" onclick="show_modify_book({{recent.id}})">修改</a> | <a href="javascript:void(0);" onclick="del_book({{recent.id}},'{{recent.name}}')">删除</a>
                         </div>
                     </a>
                 </div>
@@ -217,7 +223,7 @@
                 <!--以下是重复的内容-->
                 {% for book in books %}
                 <div class="book-box fl">
-                    <a href="#">
+                    <a href="#" onclick="show_book_detail({{book.id}})">
                         <div>
                             <img src="{{book.cover}}"/>
                         </div>
@@ -225,7 +231,7 @@
                             <span>{{book.name}}</span>
                         </div>
                         <div class="book-box-edit-btn">
-                            <a href="javascript:void(0);">查看</a> | <a href="javascript:void(0);">修改</a> | <a href="javascript:void(0);">删除</a>
+                            <a href="javascript:void(0);" onclick="show_book_detail({{book.id}})">查看</a> | <a href="javascript:void(0);" onclick="show_modify_book({{book.id}})">修改</a> | <a href="javascript:void(0);" onclick="del_book({{book.id}},'{{book.name}}')">删除</a>
                         </div>
                     </a>
                 </div>
@@ -234,85 +240,97 @@
             </div>
         </div>
     </div>
-        <div id="shelter" class="shelter hide">
-        <div class="add_book_box hide">
-            <div style="text-align: right;">
-                <a href="#" onclick="close_add_book()">[ 关闭 ]</a>
-                <script>
-                    function close_add_book() {
-                        var form = $('#add_book_form')[0];
-                        form.reset();
-                        $('#cover_uri').val("");
-                        $('#add_book_box').addClass('hide');
-                        $('#shelter').addClass('hide');
-                    }
-                </script>
+    <div id="shelter" class="shelter hide">
+        <div class="dialog">
+            <!--添加图书-->
+            <div class="add_book_box hide">
+                <div style="text-align: right;">
+                    <a href="#" onclick="close_add_book(this)">[ 关闭 ]</a>
+                    <script>
+                        function close_add_book(ele) {
+                            var form = $('#add_book_form')[0];
+                            form.reset();
+                            $('#cover_uri').val("");
+                            hide_div(ele);
+                        }
+                    </script>
+                </div>
+                <div style="width: 250px; margin: 0 auto;">
+                    <form id="add_book_form" method="post" enctype="multipart/form-data" onsubmit="return false;">
+                        <table>
+                            <tr>
+                                <td>类目</td>
+                                <td>
+                                    <select name="catalog">
+                                        {% for c in catalog_list %}
+                                        <option value="{{c.id}}">{{c.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>书名</td>
+                                <td><input id="name" type="text" name="name"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>版次</td>
+                                <td><input id="version" type="text" name="version"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>作者</td>
+                                <td><input id="authors" type="text" name="authors" placeholder="多个作者请用竖线|分隔"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>出版社</td>
+                                <td>
+                                    <select name="publisher" required>
+                                        <option></option>
+                                        {% for p in publisher_list %}
+                                        <option value="{{p.id}}">{{p.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>封面</td>
+                                <td>
+                                    <div></div>
+                                    <button onclick="$('#cover').click();">上传图片</button>
+                                    <input id="cover" name="cover" type="file" data-url="upload_cover/" style="display: none;">
+                                    <input id="cover_uri" name="cover_uri" type="hidden">
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>说明</td>
+                                <td><textarea id="description" name="description"></textarea></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <div>
+                            <input type="hidden" name="action" value="add_book">
+                            <input type="submit" value="提交" onclick="ajax_add();">
+                        </div>
+                    </form>
+                    <span id="feedback_span"></span>
+                </div>
             </div>
-            <div style="width: 250px; margin: 0 auto;">
-                <form id="add_book_form" method="post" enctype="multipart/form-data" onsubmit="return false;">
-                    <table>
-                        <tr>
-                            <td>类目</td>
-                            <td>
-                                <select name="catalog">
-                                    {% for c in catalog_list %}
-                                    <option value="{{c.id}}">{{c.name}}</option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>书名</td>
-                            <td><input id="name" type="text" name="name"></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>版次</td>
-                            <td><input id="version" type="text" name="version"></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>作者</td>
-                            <td><input id="authors" type="text" name="authors" placeholder="多个作者请用空格分隔"></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>出版社</td>
-                            <td>
-                                <select name="publisher" required>
-                                    <option></option>
-                                    {% for p in publisher_list %}
-                                    <option value="{{p.id}}">{{p.name}}</option>
-                                    {% endfor %}
-                                </select>
-                            </td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>封面</td>
-                            <td>
-                                <div></div>
-                                <button onclick="$('#cover').click();">上传图片</button>
-                                <input id="cover" name="cover" type="file" data-url="upload_cover/" style="display: none;">
-                                <input id="cover_uri" name="cover_uri" type="hidden">
-                            </td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>说明</td>
-                            <td><textarea id="description" name="description"></textarea></td>
-                            <td></td>
-                        </tr>
-                    </table>
-                    <div>
-                        <input type="hidden" name="action" value="add_book">
-                        <input type="submit" value="提交" onclick="ajax_edit();">
-                    </div>
-                </form>
-                <span id="feedback_span"></span>
+            <!--图书详情-->
+            <div id="book_detail_box" class="book_detail_box hide">
+                <div style="text-align: right"><a href="javascript:void(0);" onclick="hide_div(this)">[ 关闭 ]</a></div>
+                <div id="book_detail" class="book_detail" style="width: 350px; margin: 0 auto;"></div>
             </div>
 
+            <!--修改图书信息-->
+            <div id="modify_book_box" class="modify_book_box hide">
+                <div style="text-align: right"><a href="javascript:void(0);" onclick="hide_div(this)">[ 关闭 ]</a></div>
+                <div id="modify_book" class="modify_book" style="width: 350px; margin: 0 auto;"></div>
+            </div>
         </div>
     </div>
     <script src="/static/js/jquery-1.12.4.min.js"></script>
@@ -357,6 +375,7 @@
         function show_add_book_box(){
             // 展示遮罩层
             show_shelter();
+            $('.add_book_box').removeClass('hide');
             // 展示添加框
 
         }
@@ -365,22 +384,87 @@
             return false;
         }
 
-//        function upload_cover(ele) {
-//            console.log(ele)
-//        }
 
-        function ajax_edit() {
+        function ajax_add() {
             // 通过ajax把数据post到服务器
             $.post({
                 url: 'edit_book/',
                 data: $('#add_book_form').serialize(),
                 dataType: 'json',
                 success: function (response) {
-//                    $('feedback_span').text(response.result[1]);
-                    console.log(response);
+                    if(response[1]){
+                        $('#feedback_span').text("保存成功！");
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 2000);
+                    }else{
+                        $('#feedback_span').text(response[1]);
+                    }
+
                 }
             });
-//            console.log($('#add_book_form').serialize());
+        }
+        function ajax_edit(book_id) {
+            // 通过ajax把数据post到服务器
+            $.post({
+                url: 'edit_book/'+book_id,
+                data: $('#edit_book_form').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    if(response[1]){
+                        $('#edit_feedback_span').text("保存成功！");
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 2000);
+                    }else{
+                        $('#feedback_span').text(response[1]);
+                    }
+
+                }
+            });
+        }
+        function del_book(id,bookname) {
+            var yes = confirm("确定要删除 "+bookname);
+            if(yes){
+                $.post({
+                    url: 'edit_book/',
+                    data:{id:id, action:'del_book'},
+                    dataType: 'json',
+                    success: function (response) {
+                        if(response[0]==true){
+                            alert(response[1]);
+                            window.location.reload();
+                        }
+                    }
+                });
+            }
+        }
+        function show_book_detail(book_id) {
+            $('#shelter').removeClass('hide');
+            $('.add_book_box').addClass('hide');
+            $('.book_detail_box').removeClass('hide');
+            var html = $.get({
+                url: 'book_detail/'+book_id,
+                success: function (response) {
+//                    console.log(response);
+                    $('#book_detail').html(response);
+                }
+            })
+        }
+        function show_modify_book(book_id) {
+            $('#shelter').removeClass('hide');
+            $('.modify_book_box').removeClass('hide');
+            var html = $.get({
+                url: 'edit_book/'+book_id,
+                success: function (response) {
+                    console.log(response);
+                    $('#modify_book').html(response);
+                }
+            })
+        }
+        function hide_div(ele) {
+            $(ele).parent().parent().addClass('hide');
+            $('#shelter').addClass('hide');
         }
     </script>
 </body>

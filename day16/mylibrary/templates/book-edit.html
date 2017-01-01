@@ -1,0 +1,89 @@
+<div style="width: 250px; margin: 0 auto;">
+    <form id="edit_book_form" method="post" enctype="multipart/form-data" onsubmit="return false;">
+        <input type="hidden" name="book_id" value="{{book.id}}">
+        <table>
+            <tr>
+                <td>类目</td>
+                <td>
+                    <select name="catalog">
+                        {% for c in catalog_list %}
+                            {% if c.id == book.catalog.id %}
+                            <option value="{{c.id}}" selected>{{c.name}}</option>
+                            {% else %}
+                            <option value="{{c.id}}">{{c.name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>书名</td>
+                <td><input id="name" type="text" name="name" value="{{book.name}}"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>版次</td>
+                <td><input id="version" type="text" name="version" value="{{book.version}}"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>作者</td>
+                <td><input id="authors" type="text" name="authors" placeholder="多个作者请用竖线|分隔" value="{{authors}}"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>出版社</td>
+                <td>
+                    <select name="publisher" required>
+                        <option></option>
+                        {% for p in publisher_list %}
+                        {% if p.id == book.publisher.id %}
+                        <option value="{{p.id}}" selected>{{p.name}}</option>
+                        {% else %}
+                        <option value="{{p.id}}">{{p.name}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>封面</td>
+                <td>
+                    <img src="{{book.cover}}"/>
+                    <br/>
+                    <button onclick="$('#new_cover').click();">上传图片</button>
+                    <input id="new_cover" name="cover" type="file" data-url="upload_cover/" style="display: none;">
+                    <input id="new_cover_uri" name="cover_uri" type="hidden" value="{{book.cover}}">
+                    <script>
+                        // 上传封面图片
+                        $('#new_cover').fileupload(
+                            {
+                                dataType: 'json',
+                                done: function (e, data) {
+                                    if(data.result[0]==true){
+                                        var img = $(this).siblings('img');
+                                        img.attr('src',data.result[1]);
+                                        $('#new_cover_uri').val(data.result[1]);
+                                    }
+                                }
+                            }
+                        );
+                    </script>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>说明</td>
+                <td><textarea id="description" name="description">{{book.description}}</textarea></td>
+                <td></td>
+            </tr>
+        </table>
+        <div>
+            <input type="hidden" name="action" value="modify_book">
+            <input type="submit" value="提交" onclick="ajax_edit({{book.id}});">
+        </div>
+    </form>
+    <span id="edit_feedback_span"></span>
+</div>

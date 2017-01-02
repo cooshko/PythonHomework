@@ -234,7 +234,7 @@ def add_book(data):
         new_book = models.BookInfo()
         new_book.name = data.get('name')
         new_book.version = data.get('version')
-        new_book.cover = data.get('cover_uri')
+        new_book.cover = data.get('cover_uri',"")
         new_book.description = data.get('description')
 
         # 外键的处理
@@ -289,7 +289,7 @@ def modify_book(data):
     book = models.BookInfo.objects.filter(id=data.get('book_id')).first()
     book.name = data.get('name')
     book.version = data.get('version')
-    book.cover = data.get('cover_uri')
+    book.cover = data.get('cover_uri', "")
     book.description = data.get('description')
     book.catalog = catalog
     book.publisher = publisher

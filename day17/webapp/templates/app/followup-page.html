@@ -1,0 +1,45 @@
+<div>
+    <div>
+        <button onclick="new_client()">添加客户</button>
+    </div>
+    <div class="follow_up_box">
+        {% if ci %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>称谓</th>
+                        <th>电话</th>
+                        <th>QQ</th>
+                        <th>Email</th>
+                        <th>来源</th>
+                        <th>工作人员</th>
+                        <th>创建日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in ci %}
+                    <tr onclick="show_follow_up_detail({{ client.id }});" class="">
+                        <td>{{ client.name }}</td>
+                        <td>{{ client.phone }}</td>
+                        <td>{{ client.qq }}</td>
+                        <td>{{ client.email }}</td>
+                        <td>{{ client.get_source_display }}</td>
+                        <td>{{ client.from_staff.cname }}</td>
+                        <td>{{ client.create_at|date:"Y-m-d" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            目前没有要跟进的客户
+        {% endif %}
+    </div>
+    <script>
+        function show_follow_up_detail(cid) {
+            window.open("/webapp/staff/follow_up/detail/"+cid+"/");
+        }
+        function new_client() {
+            window.open("/webapp/staff/follow_up/detail/new/");
+        }
+    </script>
+</div>

@@ -1,0 +1,116 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "webapp/css/bootstrap.min.css" %}" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="{% static "webapp/css/dashboard.css" %}" rel="stylesheet">
+    <link href="{% static "webapp/css/mycss.css" %}" rel="stylesheet">
+    <script src="{% static "webapp/js/jquery-1.12.4.min.js" %}"></script>
+    <script src="{% static "webapp/js/jquery.cookie.js" %}"></script>
+    <script src="{% static "webapp/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "webapp/js/docs.min.js" %}"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">学员管理系统</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+{#            <li><a href="#">Dashboard</a></li>#}
+{#            <li><a href="#">Settings</a></li>#}
+{#            <li><a href="#">Profile</a></li>#}
+{#            <li><a href="#">Help</a></li>#}
+            <li><a href="/admin/" target="_blank">后台管理</a></li>
+          </ul>
+{#          <form class="navbar-form navbar-right">#}
+{#            <input type="text" class="form-control" placeholder="Search...">#}
+{#          </form>#}
+        </div>
+      </div>
+    </nav>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="/webapp/">首页</a></li>
+          </ul>
+          {% if '讲师' in roles %}
+          <ul class="nav nav-sidebar">
+            <li><a href="javascript:void(0);" data-url="/webapp/staff/attendance/">发起签到</a></li>
+            <li><a href="javascript:void(0);" data-url="/webapp/staff/score/">学员成绩</a></li>
+          </ul>
+          {% endif %}
+          {% if '课程顾问' in roles %}
+          <ul class="nav nav-sidebar">
+            <li><a href="javascript:void(0);" data-url="/webapp/staff/consult/">客户咨询</a></li>
+            <li><a href="javascript:void(0);" data-url="/webapp/staff/follow_up/">客户跟踪</a></li>
+{#            <li><a href="javascript:void(0);" data-url="/webapp/staff/experiencing/">客户试听</a></li>#}
+          </ul>
+          {% endif %}
+          {% if '员工' in roles %}
+          <ul class="nav nav-sidebar">
+            <li><a href="javascript:void(0);" data-url="/webapp/staff/manage_student/">学员信息</a></li>
+          </ul>
+          {% endif %}
+          {% if '学员' in roles %}
+          <ul class="nav nav-sidebar">
+            <li><a href="javascript:void(0);" data-url="">我的考勤</a></li>
+            <li><a href="javascript:void(0);" data-url="">我的成绩</a></li>
+          </ul>
+          {% endif %}
+          {% if roles %}
+          <ul class="nav nav-sidebar">
+            <li><a href="/webapp/logout/">退出</a></li>
+          </ul>
+          {% endif %}
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+
+    <script>
+        $(
+                $(".nav-sidebar").delegate('a','click',function () {
+                    $(".nav-sidebar li").removeClass('active');
+                    $(this).parent().addClass('active');
+                    var url = $(this).attr('data-url');
+                    $.get({
+                        url: url,
+                        success: function(response){
+                            $("div.main").html(response);
+                        }
+                    })
+                })
+        );
+
+        var csrftoken = $.cookie('csrftoken');  // 获取cookie中csrftoken值
+        function csrfSafeMethod(method) {
+            // 这个函数用于判断请求的方法，如果匹配的话，则返回true；主要目的是这些方法不需要修改头信息
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        // $.ajaxSetup是jQuery的特有方法，用于在ajax发起之前和之后的动作
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+    </script>
+  </body>
+</html>

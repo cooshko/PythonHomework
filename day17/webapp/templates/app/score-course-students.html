@@ -1,0 +1,95 @@
+{% load myfilters %}
+<h1>{{ course.name }} 第{{ course.volume }}期</h1>
+{% if students %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <td>学员姓名</td>
+                <td>性别</td>
+                <td>成绩</td>
+                <td>状态</td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for student in students %}
+            <tr>
+                <td>{{ student.name }}</td>
+                <td>{{ student.gender }}</td>
+                <td>
+                    {% with score=student|get_score:course.id %}
+                    {% if score %}
+                    <input type="text" value="{{ score }}" exist="true" student_id="{{ student.id }}" onchange="score_modify(this)">
+                    {% else %}
+                    <input type="text" value="" exist="false" student_id="{{ student.id }}" onchange="score_modify(this)">
+                    {% endif %}
+                    {% endwith %}
+                    <span></span>
+                </td>
+                <td>{{ student.status.name }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <button onclick="push_score()">保存</button>
+    <script>
+        function score_modify(ele) {
+            $(ele).addClass('modified-score');
+        }
+        function push_score() {
+            var modified_queue = [];
+            var new_queue = [];
+            $('input.modified-score').each(function () {
+                // console.log($(this));
+                var exist = $(this).attr('exist') == 'true';  // 检查是否历史记录
+                var obj = {};   // 临时对象，存放成绩和学员id
+                obj['score'] = $(this).val();
+                obj['student_id'] = $(this).attr('student_id');
+                if(exist){
+                    // 对已经存在的成绩进行修改，添加到修改队列中
+                    modified_queue.push(obj);
+                }else{
+                    // 添加成绩，加到新增队列中
+                    new_queue.push(obj);
+                }
+            });
+            var queue = {};
+            queue['modified_queue']=modified_queue;
+            queue['new_queue']=new_queue;
+            var json_str = JSON.stringify(queue);
+            $.post({
+                url: '/webapp/staff/score/?course_id={{ course.id }}',
+                data: {'json_str': json_str},
+                dataType: 'json',
+                success: function (response) {
+                    if(response.status=='ok'){
+                        // 保存成功，清理工作
+                        queue={};
+                        modified_queue=[];
+                        new_queue=[];
+                        $('input.modified-score')
+                                .removeClass('modified-score')
+                                .attr('exist', 'true')
+                                .css("color", "")
+                                .siblings('span')
+                                .text("");
+
+                        // 提醒用户
+                        alert('保存成功');
+                    }else{
+                        var msg_obj = response.msg;
+                        switch ((typeof msg_obj).toLowerCase()){
+                            case "object":
+                                for(var key in msg_obj){
+                                    $('input[student_id="' + msg_obj[key].student_id + '"]')
+                                            .css("color", "red").siblings('span').text(msg_obj[key].msg);
+                                }
+                                break;
+                            default:
+                                alert(msg);
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+{% endif %}

@@ -1,0 +1,39 @@
+<h1 class="page-header">课程信息</h1>
+<div>
+    {% if courses %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>课名</th>
+                    <th>期数</th>
+                    <th>开课日期</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in courses %}
+                <tr>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.volume }}</td>
+                    <td>{{ c.start_time|date:'Y-m-d' }}</td>
+                    <td><a href="javascript:void(0);" data-url="/webapp/staff/attendance/?course_id={{ c.id }}" onclick="attendance(this)">开始考勤</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <script>
+            function attendance(ele) {
+                var url = $(ele).attr('data-url');
+                $.get({
+                    url: url,
+                    dataType: "html",
+                    success: function(response) {
+                        $('div.main').html(response);
+                    }
+                })
+            }
+        </script>
+    {% else %}
+        好像没有您主持的课程哟
+    {% endif %}
+</div>

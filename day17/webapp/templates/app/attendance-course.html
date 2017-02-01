@@ -1,0 +1,62 @@
+{% load staticfiles %}
+<div>
+    <h1>{{ course.name }} 第{{ course.volume }}期</h1>
+{#    <p>开课时间 {{ course.start_time|date:'Y-m-d' }}</p>#}
+    <p>当前日期 {{ current_date|date:'Y-m-d' }}</p>
+    <p>主讲：
+    {% for teacher in course.teachers.all %}
+    {{ teacher.cname }}&nbsp;
+    {% endfor %}
+    </p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>到场</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>
+                    {% if student.id in attended_students %}
+                    <span>√</span>{#&nbsp;&nbsp;<a href="javascript:void(0);" onclick="attend(this, {{ student.id }}, 'cancel')" >取消</a>#}
+                    {% else %}
+                     <button onclick="attend(this,{{ student.id }}, 'attend')">到</button>
+                    {% endif %}
+                    <img src="{% static "webapp/img/loading.gif" %}" class="hide">
+                </td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.gender }}</td>
+                <td>{{ student.status.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% csrf_token %}
+    <script>
+        // 签到函数
+        function attend(ele, sid, action) {
+{#            $(ele).parent().parent().find('td:first-child').text('√');#}
+            var data = {};
+            data.student_id = sid;
+            data.action = action;
+            $(ele).addClass('hide').siblings('img').removeClass('hide');
+            $.post({
+                url: "/webapp/staff/attendance/?course_id={{ course.id }}",
+                data: data,
+                dataType: "json",
+                success: function (response) {
+                    if(response.status=='ok'){
+                        $(ele).parent().parent().find('td:first-child').text('√');
+                    }
+                },
+                error: function () {
+
+                }
+            })
+        }
+    </script>
+</div>

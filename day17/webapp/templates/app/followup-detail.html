@@ -1,0 +1,227 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>客户跟进情况</title>
+    <link href="{% static "webapp/css/bootstrap.min.css" %}" rel="stylesheet">
+    <style>
+        body{
+            padding: 10px 20px;
+        }
+        caption{
+            font-size: 3em;
+        }
+        table.new_form th{
+            vertical-align: top;
+            padding-right: 10px;
+        }
+        .fl{
+            float: left;
+        }
+        .clearfix:after{
+            content: ".";
+            clear: both;
+            display: block;
+            visibility: hidden;
+            height: 0;
+        }
+        div.client_info, div.actions, div.history{
+            margin-bottom: 30px;
+        }
+        div.client_info th{
+            background-color: #9acfea;
+        }
+        div.client_info th, div.client_info td{
+            padding: 10px 20px;
+        }
+        .add_record, .no_follow_anymore, .experiencing{
+            width: 350px;
+        }
+        .actions textarea{
+            width: 250px;
+            height: 200px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div>
+            <div class="client_info">
+                <table border="1">
+                    <caption>客户资料{% if ci.dont_follow %}
+                    （不再跟进）
+                    {% endif %}</caption>
+                    <tr>
+                        <th>称谓</th><td>{{ ci.name }}</td>
+                        <th>电话</th><td>{{ ci.phone }}</td>
+                        <th>QQ</th><td>{{ ci.qq }}</td>
+                    </tr>
+                    <tr>
+                        <th>邮箱</th><td>{{ ci.email }}</td>
+                        <th>来源</th><td>{{ ci.get_source_display }}</td>
+                        <th>录入员</th><td>{{ ci.from_staff.cname }}</td>
+                    </tr>
+                    <tr>
+                        <th>备注</th><td colspan="5">{{ ci.remark|linebreaks }}</td>
+                    </tr>
+                </table>
+            </div>
+            <h1>操作</h1>
+            <div class="actions clearfix">
+                <div class="add_record fl">
+                    <form method="post">
+                        {% csrf_token %}
+                        <table class="new_form">
+                            {{ new_form.as_table }}
+                        </table>
+                        <input type="submit" value="添加">
+                    </form>
+                </div>
+                <div class="experiencing fl">
+                    安排试听
+                    <br>
+                    <label>
+                        校区
+                        <select id="area" onchange="load_courses()">
+                            <option></option>
+                            {% for area in areas %}
+                            <option value="{{ area.id }}">{{ area.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <br>
+                    <label>
+                        课程
+                        <select id="course" disabled="disabled">
+                            <option></option>
+                        </select>
+                    </label>
+                    <br>
+                    <button onclick="experiencing()">安排试听</button>
+                </div>
+                <div class="no_follow_anymore fl">
+                    <label>
+                        <textarea placeholder="请填写不再跟进的原因"></textarea>
+                    </label>
+                    <br>
+                    <button onclick="no_follow_anymore()">不再跟进</button>
+                </div>
+            </div>
+            <div class="history">
+                {% if history %}
+                    <table class="table table-bordered table-hover">
+                    <caption>历史记录</caption>
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>记录</th>
+                                <th>跟进人员</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in history %}
+                            <tr>
+                                <td>
+                                    {{ record.follow_time|date:'Y-m-d H:i:s' }}
+                                </td>
+                                <td>
+                                    {{ record.result|linebreaks }}
+                                </td>
+                                <td>
+                                    {{ record.staff.cname }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    暂无跟进记录
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script src="{% static "webapp/js/jquery-1.12.4.min.js" %}"></script>
+    <script src="{% static "webapp/js/jquery.cookie.js" %}"></script>
+    <script>
+        var client_id="{{ ci.id }}";
+        var csrftoken = $.cookie('csrftoken');  // 获取cookie中csrftoken值
+        function csrfSafeMethod(method) {
+            // 这个函数用于判断请求的方法，如果匹配的话，则返回true；主要目的是这些方法不需要修改头信息
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        // $.ajaxSetup是jQuery的特有方法，用于在ajax发起之前和之后的动作
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        function no_follow_anymore() {
+            // 操作人员确认
+            if(!confirm("确定不再跟进吗？"))
+                return false;
+
+            $.post({
+                url:'/webapp/staff/follow_up/no_more/',
+                data:{"cid": client_id, "reason": $("div.no_follow_anymore textarea").val()},
+                dataType:"json",
+                success:function (response) {
+                    if(response.status=='ok')
+                        alert("操作成功！");
+                    window.location.reload();
+                }
+            });
+        }
+
+        // ajax获取所选校区的所有课程
+        function load_courses() {
+            //console.log($("#area").val());
+            $.get({
+                url:"/webapp/staff/load_courses/area/"+$("#area").val()+"/",
+                dataType:"json",
+                success:function (response) {
+                    $("#course option[value]").remove();
+                    $("#course").attr("disabled", true);
+                    if(response.length>0){
+                        for(var key in response){
+                            var val=response[key].id;
+                            var name=response[key].name;
+                            var vol=response[key].volume;
+                            var opt=document.createElement('option');
+                            opt.value=val;
+                            opt.innerText=name+" 第"+vol+"期";
+                            $("#course").append(opt);
+                        }
+                        $("#course").attr("disabled", false);
+                    }
+                }
+            });
+        }
+
+        // 安排试听，以AJAX POST方式提交申请，返回ok或fail
+        function experiencing() {
+            var course_id = $("#course").val();
+            var area_id = $("#area").val();
+            if(course_id){
+                $.post({
+                    url:"/webapp/staff/exp_course/",
+                    data:{"client_id": client_id, "course_id": course_id, "area_id": area_id},
+                    dataType:"json",
+                    success:function (response) {
+                        if(response.status=='ok')
+                            alert("已安排试听");
+                        else
+                            alert(response.msg);
+                        window.location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

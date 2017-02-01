@@ -1,0 +1,37 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>学员管理系统</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "webapp/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "webapp/css/signin.css" %}" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="{% static "webapp/js/ie8-responsive-file-warning.js" %}"></script><![endif]-->
+    <script src="{% static "webapp/js/ie-emulation-modes-warning.js" %}"></script>
+  </head>
+  <body>
+    <div class="container">
+      <form class="form-signin" role="form" method="post">
+        {% csrf_token %}
+        <h2 class="form-signin-heading">请登录</h2>
+        <input name="username" type="text" class="form-control" placeholder="用户名" required autofocus>
+        <input name="password" type="password" class="form-control" placeholder="密码" required>
+        <input class="btn btn-lg btn-primary btn-block" type="submit" value="登录">
+      </form>
+    </div>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="{% static "webapp/js/ie10-viewport-bug-workaround.js" %}"></script>
+  </body>
+</html>
+

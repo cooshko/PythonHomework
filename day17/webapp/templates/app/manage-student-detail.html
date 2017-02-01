@@ -1,0 +1,144 @@
+{% load myfilters %}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ student.name }}的资料</title>
+    <link href="{% static "webapp/css/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "webapp/css/dashboard.css" %}" rel="stylesheet">
+    <style>
+        .w{
+            width: 690px;
+            margin-left: 50px;
+        }
+        .attendance td{
+            padding: 10px 20px;
+        }
+        .bkred{
+            background-color: #dca7a7;
+        }
+        .hide{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="w">
+        <h1>{{ student.name }}</h1>
+        <select onchange="change_status()" class="status_selector">
+            {% for s in all_status %}
+            <option value="{{ s.id }}" {% if s.name == student.status.name %}selected{% endif %}>{{ s.name }}</option>
+            {% endfor %}
+        </select>
+        <span class="status-tips hide">状态已更新</span>
+        <br/>
+        <br/>
+    {% with his_courses=student.courses.all %}
+        {% if his_courses %}
+            他参加的课程如下
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>课程名称</th>
+                        <th>期</th>
+                        <th>成绩</th>
+                        <th>出勤</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in his_courses %}
+                    <tr>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.volume }}</td>
+                        <td>{{ student|get_score:course.id }}</td>
+                        <td><a href="attendance/{{ course.id }}/" onclick="return get_student_attendance_by_course(this)">查看</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            TA还没有参加任何课程
+        {% endif %}
+    {% endwith %}
+    </div>
+    <div class="w attendance">
+
+    </div>
+    <script src="{% static "webapp/js/jquery-1.12.4.min.js" %}"></script>
+    <script src="{% static "webapp/js/jquery.cookie.js" %}"></script>
+    <script>
+        var csrftoken = $.cookie('csrftoken');  // 获取cookie中csrftoken值
+        function csrfSafeMethod(method) {
+            // 这个函数用于判断请求的方法，如果匹配的话，则返回true；主要目的是这些方法不需要修改头信息
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        // $.ajaxSetup是jQuery的特有方法，用于在ajax发起之前和之后的动作
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        function get_student_attendance_by_course(ele) {
+            var url = $(ele).attr("href");
+            $.get({
+                url: url,
+                dataType: 'json',
+                success: function (response) {
+                    if(response){
+                        var div = document.createElement('div');
+                        var h = document.createElement('h4');
+                        var table = document.createElement('table');
+                        table.border=1;
+                        var total_times = 0;
+                        var absence_times = 0;
+                        for(var key in response){
+                            total_times++;
+                            var tr = document.createElement('tr');
+                            var td1 = document.createElement('td');
+                            var td2 = document.createElement('td');
+                            td1.innerText = key;
+                            if(response[key]){
+                                td2.innerText = response[key];
+                            }else{
+                                absence_times++;
+                                td2.innerText = "缺勤";
+                                td2.className = "bkred";
+                            }
+                            tr.appendChild(td1);
+                            tr.appendChild(td2);
+                            table.appendChild(tr);
+                        }
+                        var rate = parseInt((1-absence_times/total_times)*100);
+                        h.innerText=$(ele).parent().parent().find('td:first-child').text() + " 的出勤率为" + rate.toString() + "%";
+                        div.appendChild(h);
+                        div.appendChild(table);
+                        $('div.attendance').html(div.outerHTML);
+                    }
+
+                }
+            });
+            return false
+        }
+        
+        function change_status() {
+            var new_status_id = $('.status_selector').val();
+            $.post({
+                url: window.location,
+                data: {"new_status_id": new_status_id},
+                success:function (response) {
+                    console.log(response);
+                    $('span.status-tips').removeClass('hide');
+                    setTimeout(function () {
+                        $('span.status-tips').addClass('hide');
+                    }, 3000);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

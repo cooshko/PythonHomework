@@ -1,0 +1,22 @@
+<h1 class="page-header">学员成绩</h1>
+{% if course_list %}
+    <h2>我的课</h2>
+    {% for course in course_list %}
+    <p>
+        {{ course.name }} <a href="javascript:;" onclick="course_score({{ course.id }})">详情</a>
+    </p>
+    {% endfor %}
+{% else %}
+    <h2>您好像还没有开课</h2>
+{% endif %}
+<script>
+    function course_score(course_id) {
+        $.get({
+            url: "/webapp/staff/score/?course_id="+course_id,
+            dataType: "html",
+            success: function (response) {
+                $('div.main').html(response);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,113 @@
+{# 在管理页面的内嵌页 #}
+<div>
+    <div>
+        待处理的咨询：<span class="untreated-num"></span>个
+        <button onclick="get_a_job()">处理</button>
+    </div>
+    <div>
+        我处理中的咨询：
+        <div class="handling-consult">
+
+        </div>
+    </div>
+    <div>
+        我处理完的咨询
+        <div class="handled-consult">
+
+        </div>
+    </div>
+    <script>
+        function check_consult_num() {
+            // 获取有多少个待处理的咨询
+            //console.log("yes");
+            $.get({
+                url: "/webapp/staff/consult/",
+                data: {"action": "check_consult_num"},
+                dataType: "json",
+                timeout: 3000,
+                success:function (response) {
+                    //console.log(response);
+                    var num = response.count;
+                    $("span.untreated-num").text(num);
+                },
+                error: function (r,s,t) {
+                    console.log(r);
+                    console.log(s);
+                    console.log(t);
+                }
+            });
+        }
+
+        function get_a_job() {
+            // 向服务器领取一个待处理的咨询的token
+            $.get({
+                url: "consult/",
+                data:{"action": "get_a_job"},
+                dataType:"json",
+                success:function (response) {
+                    var token = response.token;
+                    var source = response['source'];
+                    open_a_consult(token);
+                }
+            });
+        }
+        function open_a_consult(token) {
+            // 打开一个咨询页面
+            //var current_url = window.location.href;
+            //console.log(current_url);
+            // window.open("consult/?action=open_a_consult&token=" + token);
+            window.open("consult/chat/?token=" + token);
+        }
+
+        function get_handling() {
+            $.get({
+                url:"/webapp/staff/consult/get_handling/",
+                dataType: "json",
+                success: function (response) {
+                    console.log(response);
+                    var f = function (l,ele,t) {
+                        if(l.length>0){
+                        // 有处理中的咨询，生成ul li元素
+                            var ul = document.createElement('ul');
+                            for(var key in l){
+                                var li = document.createElement('li');
+                                var a = document.createElement('a');
+                                a.href = "consult/chat/?token=" + l[key].token;
+                                a.target = "_blank";
+                                a.innerText = l[key].create_at + " " + (l[key].clientinfo__name||"");
+                                li.appendChild(a);
+                                ul.appendChild(li);
+                            }
+                            $(ele).html(ul.outerHTML);
+                        }else{
+                            $(ele).text(t);
+                        }
+                    };
+                    f(response['handling_list'],"div.handling-consult","没有处理中的咨询");
+                    f(response['finished_list'],"div.handled-consult","没有处理完的咨询");
+{#                    if(response.length>0){#}
+{#                        // 有处理中的咨询，生成ul li元素#}
+{#                        var ul = document.createElement('ul');#}
+{#                        for(var key in response){#}
+{#                            var li = document.createElement('li');#}
+{#                            var a = document.createElement('a');#}
+{#                            a.href = "consult/chat/?token=" + response[key].token;#}
+{#                            a.target = "_blank";#}
+{#                            a.innerText = response[key].create_at;#}
+{#                            li.appendChild(a);#}
+{#                            ul.appendChild(li);#}
+{#                        }#}
+{#                        $("div.handling-consult").html(ul.outerHTML);#}
+{#                    }else{#}
+{#                        $("div.handling-consult").text("没有处理中的咨询");#}
+{#                    }#}
+                }
+            });
+        }
+
+        // 循环读取目前有多少待处理咨询，间隔为1秒
+        var untreated_int = setInterval("check_consult_num()", 1000);
+        get_handling();
+
+    </script>
+</div>

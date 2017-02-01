@@ -1,0 +1,437 @@
+{# 该页面是客服的聊天界面 #}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>课程咨询</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        body{
+            font-family: "Microsoft Yahei", Arial, serif;
+        }
+        .hide{
+            display: none !important;
+        }
+        .fl{
+            float: left;
+        }
+        .fr{
+            float: right;
+        }
+        .clearfix:after{
+            content: ".";
+            clear: both;
+            display: block;
+            visibility: hidden;
+            height: 0;
+        }
+        .chatbox{
+            position: absolute;
+            top: 5px;
+            bottom: 5px;
+            left: 5px;
+            right: 200px;
+            border: 1px gray solid;
+        }
+        .message_box .title{
+            position: relative;
+            height: 20px;
+            line-height: 20px;
+            padding: 5px 10px;
+            border-bottom: gray 1px solid;
+        }
+        .message_box .close_btn{
+            background: url("{% static "webapp/img/icon.png" %}") no-repeat 0 0;
+            position: absolute;
+            top: 10px;
+            right: 8px;
+            width: 15px;
+            height: 15px;
+        }
+        .message_box .message_history{
+            position: absolute;
+            top: 32px;
+            left:0;
+            right:0;
+            bottom: 205px;
+            padding: 10px;
+            overflow: auto;
+        }
+        .message .message_time{
+            text-align: center;
+            font-size: 8px;
+        }
+        .message .message_content {
+            margin-top: 10px;
+            padding: 5px 10px;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            display: block;
+        }
+        .message .received{
+            background-color: #e0e0e0;
+        }
+        .message .sent{
+            background-color: lightgreen;
+        }
+        .message .talkTo, .message .me{
+            height: 30px;
+            line-height: 30px;
+        }
+        .left-triangle{
+            margin-top: 10px;
+            display: block;
+            border: 10px solid transparent;
+            border-top-color: #e0e0e0;
+            margin-right: -10px;
+        }
+        .right-triangle{
+            margin-top: 10px;
+            display: block;
+            border: 10px solid transparent;
+            border-top-color: lightgreen;
+            margin-left: -10px;
+        }
+        .editor_box{
+            position: absolute;
+            height: 200px;
+            left:0;
+            right:0;
+            bottom: 5px;
+        }
+        .editor_box .title{
+            position: relative;
+            height: 30px;
+            line-height: 30px;
+            background-color: lightgray;
+            border: 1px solid gray;
+            border-left: 0;
+            border-right: 0;
+        }
+        .editor_box .editor_content{
+            padding: 5px;
+        }
+        .editor_content textarea{
+            width: 99%;
+            height: 100px;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        .editor_box .bar{
+            position: relative;
+            margin-right: 20px;
+        }
+        .editor_box .bar a{
+            display: block;
+            background-color: greenyellow;
+            text-decoration: none;
+            height:32px;
+            line-height: 32px;
+            width: 100px;
+            text-align: center;
+            border: 2px solid gray;
+        }
+        .editor_box .bar span{
+            position: absolute;
+            display: block;
+            width: 150px;
+            right: 100px;
+            bottom: 5px;
+        }
+        div.client_info_box{
+            position: absolute;
+            width: 180px;
+            top: 5px;
+            right: 5px;
+            bottom:5px;
+            border: 1px solid gray;
+            padding-top: 20px;
+            padding-left: 10px;
+            overflow: auto;
+        }
+        .client_info_box input{
+            width: 170px;
+        }
+         .client_info_box textarea{
+             width: 170px;
+             height:200px;
+         }
+    </style>
+</head>
+<body>
+<div class="chatbox">
+    <div class="message_box">
+        <div class="title">
+            <span>客户</span>
+            <a href="javascript:;" class="close_btn" onclick="shutdown()"></a>
+        </div>
+        <div class="message_history">
+
+        </div>
+    </div>
+    <div class="editor_box">
+        <div class="title">
+            <!--这里有表情按钮、关闭会话按钮-->
+        </div>
+        <div class="editor_content">
+            <div>
+                <textarea placeholder="输入咨询内容" class="my_msg" onkeydown="isEnter(event)" autofocus></textarea>
+            </div>
+            <div class="bar fr clearfix">
+                <span>按Ctrl+Enter发送</span>
+                <a href="javascript:;" onclick="send_msg()">发 送</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="client_info_box">
+    <div>
+        <button id="close_consult" onclick="close_consult()" {% if not st.active %}disabled{% endif %}>结束该聊天</button>
+    </div>
+    <div>
+        <form id="post_client_info" method="post">
+            客户信息：
+            <p>
+                称谓<br>
+                <input type="text" name="name" id="name" value="{{ ci.name }}">
+            </p>
+            <p>
+                电话<br>
+                <input type="text" name="phone" id="phone" value="{{ ci.phone }}">
+            </p>
+            <p>
+                QQ<br>
+                <input type="text" name="qq" id="qq" value="{{ ci.qq }}">
+            </p>
+            <p>
+                电邮<br>
+                <input type="email" name="email" id="email" value="{{ ci.email }}">
+            </p>
+            <p>
+                备注<br>
+                <textarea name="remark" id="remark">{{ ci.remark }}</textarea>
+            </p>
+        </form>
+
+        <p>
+            <button onclick="save_client_info()">保存</button>
+        </p>
+        <p>
+            <span id="save_result"></span>
+        </p>
+    </div>
+
+</div>
+<!--以下jquery路径需要修改-->
+<script src="{% static "webapp/js/jquery-1.12.4.min.js" %}"></script>
+<script src="{% static "webapp/js/jquery.cookie.js" %}"></script>
+<script>
+    var token = "{{ st.token }}";
+    var active = "{{ st.active }}"=="True";
+
+    var csrftoken = $.cookie('csrftoken');  // 获取cookie中csrftoken值
+        function csrfSafeMethod(method) {
+            // 这个函数用于判断请求的方法，如果匹配的话，则返回true；主要目的是这些方法不需要修改头信息
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        // $.ajaxSetup是jQuery的特有方法，用于在ajax发起之前和之后的动作
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+    var LAST_MSG_ID=0;
+    var int; // 定时器全局变量
+    $(document).ready(function () {
+        // 展示最新的聊天记录
+        scroll_history();
+        // 定时器定义，间隔为1秒，去服务器收取新消息
+        int = setInterval(function () {
+            // 总会接收一次聊天内容
+            receive_msg();
+            // 如果该会话已经被结束，则不再运行该计时器
+            if(!active)
+                clearInterval(int);
+        }, 1000);
+    });
+
+    // 终止本次聊天，取消定时器
+    function shutdown() {
+        var yes = confirm("结束本次聊天？");
+        if(yes){
+            clearInterval(int);
+        }
+    }
+
+    // 从服务器收消息的函数
+    function receive_msg() {
+        // console.log("从服务器收新消息");
+        // add_history(msg, true);
+        var msg_list;
+        $.get({
+            url: "/webapp/staff/consult/staff_get_msg/",
+            data: {"lastMsgID": LAST_MSG_ID, "token": "{{ st.token }}" },
+            dataType: "json",
+            success: function (response) {
+                console.log(response);
+                if(response.length>0){
+                    for(var item in response){
+                        LAST_MSG_ID = response[item].id;
+                        add_history(response[item].msg, response[item].from_client);
+                    }
+                }
+            }
+        });
+    }
+
+    // 在textarea里按下ctrl+回车，立即调用发送函数
+    function isEnter(event) {
+        if(event.keyCode==13 && event.ctrlKey){
+            console.log("enter");
+            send_msg();
+        }
+    }
+
+    // 发送函数
+    function send_msg() {
+        var msg = $('textarea.my_msg').val();
+        msg = $.trim(msg);
+        if (msg.length == 0) {
+            alert("请输入内容后在发送");
+            $('textarea.my_msg').val("");
+            return false;
+        }
+
+        // 此处应post消息内容到服务器上
+        $.post({
+            url: "",
+            data: {'msg': msg},
+            dataType: "json",
+            success: function (response) {
+                console.log(response);
+                // 假设发送成功
+                if(response.status=='ok'){
+                    //add_history(msg,false);
+
+                    $('textarea.my_msg').val("");
+                }else{
+                    alert(response.msg);
+                }
+            }
+        });
+
+    }
+
+    // 成功发送或接收消息后，添加到聊天记录并展示
+    function add_history(msg, from_client) {
+        var div1 = document.createElement('div');
+        var div2 = document.createElement('div');
+        var div3 = document.createElement('div');
+        var div4 = document.createElement('div');
+        var div5 = document.createElement('div');
+
+
+        div2.innerText = now_time();
+        div3.innerText = from_client?"客户":"我";
+        div5.innerText = msg;
+
+        var float = from_client ? "fl" : "fr";
+        var in_or_out = from_client ? "received" : "sent";
+        var me_or_she = from_client ? "talkTo" : "me";
+        var left_or_right = from_client ? "left-triangle" : "right-triangle";
+        div1.className="message clearfix";
+        div2.className="message_time";
+        div3.className= me_or_she+" "+float;
+        div4.className= left_or_right+" "+float;
+        div5.className="message_content " + in_or_out + " "+float;
+
+        div1.appendChild(div2);
+        div1.appendChild(div3);
+        div1.appendChild(div4);
+        div1.appendChild(div5);
+
+        $('.message_history').append(div1);
+        scroll_history();
+    }
+
+    // 获取当前时间字符串
+    function now_time() {
+        var d = new Date();
+        return d.toLocaleTimeString()
+    }
+
+    // 滚屏到最底
+    function scroll_history() {
+        $('div.message_history').animate({scrollTop:99999}, 'slow');
+    }
+
+    // 结束咨询会话
+    function close_consult() {
+        var yes = confirm("关闭当前会话？");
+        if(yes){
+            $.get({
+                url:"/webapp/staff/consult/close_a_consult/",
+                data: {"token": token},
+                dataType:"json",
+                success: function (response) {
+                    if(response.status=='ok'){
+                        // 服务器已关闭该会话
+                        $("#close_consult").attr("disabled",true);
+                        clearInterval(int);
+                        alert("该会话已成功关闭")
+                    }else if(response.status=='fail'){
+                        alert(response.msg);
+                    }
+                }
+            });
+        }
+    }
+
+    // 保存客户信息
+    function save_client_info() {
+        var client_name = $("#name").val();
+        var client_phone = $("#phone").val();
+        var client_email = $("#email").val();
+        var client_qq = $("#qq").val();
+        var client_remark = $("#remark").val();
+        var data = {
+            "name": client_name,
+            "phone":client_phone,
+            "email":client_email,
+            "qq":client_qq,
+            "remark":client_remark,
+            "token":token
+        };
+        if(client_phone || client_email || client_qq){
+            // 电话、邮箱、qq必须有其中一个才能进行保存
+            $.post({
+                url: "/webapp/staff/consult/save_client_info/",
+                data: data,
+                dataType: "json",
+                success:function (response) {
+                    if(response.status=='ok'){
+                        // 保存成功
+                        $("#save_result").text(response.msg);
+                    }else{
+                        $("#save_result").text(response.msg);
+                    }
+                }
+            });
+        }
+    }
+
+    function follow_up() {
+
+    }
+</script>
+</body>
+</html>

@@ -7,3 +7,10 @@
 >* ajax发帖/点赞/分页/登陆/层级评论
 >* 展示在线用户列表
 >* 可以置顶帖子（需使用admin:passwd123登陆django管理后台http://127.0.0.1:8000/admin/ ，对APP01下的post表的帖子设置top和top_time）
+
+
+本程序依赖Pillow，请先安装
+已有测试账号密码如下
+coosh 123
+panny 123
+dan 123

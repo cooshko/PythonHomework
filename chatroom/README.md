@@ -1,4 +1,5 @@
 依赖：redis、sqlalchemy、tornado
+执行项目目录下的app.py即可。如需重建数据库，请执行modules下的models.py
 
 作业需求：项目实战 开发一个WEB聊天室
 >* 用户可以与好友一对一聊天

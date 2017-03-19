@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel</title>
+    <style>
+        *{
+            margin: 0;
+            padding:0;
+        }
+        a{
+            text-decoration: none;
+        }
+        .clearfix:after{
+            content: ".";
+            clear: both;
+            display: block;
+            visibility: hidden;
+            height: 0;
+        }
+        .fl{
+            float: left;
+
+        }
+        .fr{
+            float: right;
+        }
+        .hide{
+            display: none !important;
+        }
+        body{
+            background: url("/static/assets/img/bg.jpg") no-repeat;
+            -webkit-background-size:100%;
+            background-size:cover;
+            font-family: Arial, '微软雅黑', "Microsoft YaHei",serif;
+        }
+        ul{
+            list-style: none;
+        }
+        .shelter{
+            position: fixed;
+            background-color: rgba(0,0,0,.4);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 99;
+        }
+        .dialog{
+            border: 2px solid gray;
+            display: block;
+            width: 300px;
+            height: 350px;
+            background-color: white;
+            margin: 100px auto;
+            z-index: 999;
+        }
+        .main_container{
+            width: 800px;
+            height:650px;
+            margin: 60px auto;
+            background-color: white;
+            position: relative;
+        }
+        .left_container{
+            width: 260px;
+            height: 100%;
+            position: relative;
+            background-color: #2e3238;
+            padding-left: 20px;
+        }
+        .right_container{
+            width: 520px;
+            height:100%;
+            position: relative;
+            background-color: #eee;
+        }
+        .right_container .title{
+            height: 30px;
+            line-height: 36px;
+            padding: 5px;
+            border-bottom: 2px solid black;
+            position: relative;
+        }
+        .right_container .white_board{
+            position: absolute;
+            overflow: auto;
+            /*height: 330px;*/
+            width: 100%;
+            top:42px;
+            left:0;
+            right: 0;
+            bottom: 80px;
+            background-color: white;
+
+        }
+        .right_container .message_editor_box{
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom:0;
+            width: 100%;
+            height: 75px;
+        }
+        .right_container .message_editor_box{
+            padding-left: 10px;
+            padding-top: 10px;
+        }
+        .right_container .message_editor_box .toolbar{
+            padding-left: 5px;
+        }
+        .right_container .message_editor_box input{
+            height: 24px;
+            line-height: 24px;
+            width: 400px;
+            padding: 5px;
+            vertical-align: middle;
+        }
+        #sendmsg_btn{
+            display: inline-block;
+            background-color: green;
+            color: white;
+            width: 80px;
+            height: 38px;
+            line-height: 38px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .my_info{
+            /*padding: 10px;*/
+        }
+        .action_bar{
+            height: 40px;
+            position: absolute;
+            bottom:10px;
+        }
+        .action_bar div{
+            width:85px;
+            height: 100%;
+            line-height: 40px;
+            text-align: center;
+            /*margin-left: 3px;*/
+        }
+        .action_bar a{
+            display: block;
+            font-weight: bold;
+        }
+        .action_bar a:hover{
+            background-color: green;
+            border-radius: 5px;
+        }
+        .action_bar .active{
+            background-color: green;
+            border-radius: 5px;
+        }
+        .left_container *{
+            color: #FFFFFF;
+        }
+        .search_bar{
+            position: absolute;
+            bottom: 60px;
+        }
+        .search_bar div{
+            /*margin-left: 20px;*/
+        }
+        .search_bar input{
+            color: #000;
+            padding-left: 3px;
+        }
+        .search_result{
+            position: absolute;
+            bottom: 100px;
+        }
+        .search_btn{
+            margin-left: 10px;
+            display: inline-block;
+            color: white;
+            width: 40px;
+            height: 24px;
+            line-height: 24px;
+            background-color: green;
+            border-radius: 10px;
+            text-align: center;
+        }
+        #search_ele{
+            height: 24px;
+            line-height: 24px;
+        }
+        a.add_friend_btn, a.join_group_btn{
+            color: white;
+            display: inline-block;
+            width: 80px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            background-color: green;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        .mt-10{
+            margin-top: 10px;
+        }
+        .chat_list{
+            /*height: 280px;*/
+            position: absolute;
+            top: 25px;
+            left:0;
+            right:0;
+            bottom: 140px;
+            overflow: auto;
+        }
+        .chat_list .chat{
+            width: 230px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-left: 10px;
+            overflow: hidden;
+            margin:5px auto;
+            position: relative;
+        }
+        .chat_list .chat:hover{
+            background-color: #1a1a1a;
+        }
+        .chat_list .chat img{
+            border-radius: 5px;
+            width:50px;
+            height:50px;
+            vertical-align: middle;
+        }
+        .chat_list .chat span{
+            margin-left: 10px;
+        }
+        .chat_list .active{
+            background-color: #1a1a1a;
+        }
+        .message div{
+            margin: 5px;
+        }
+        img.notify_log{
+            position: absolute;
+            left: 50px;
+            top: -2px;
+            max-height: 20px;
+            max-width: 20px;
+        }
+        .form_container{
+            position: relative;
+            height: 100%;
+        }
+        .title_row, .head_row, .friend_row{
+            padding:10px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        .title_row{
+            text-align: center;
+        }
+        .friend_row {
+            height: 150px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .friend_row ul{
+            /*margin-left: 10px;*/
+        }
+        #new_title{
+            width: 260px;
+            height: 36px;
+            line-height: 36px;
+            font-size: 20px;
+            text-align: center;
+            padding: 5px;
+            border-radius: 10px;
+            border: 2px solid lightgray;
+        }
+        ul.friend_list li{
+            display: block;
+            height: 32px;
+            line-height: 32px;
+            margin: 4px auto;
+            overflow: hidden;
+            padding-left: 15px;
+            border: solid 1px transparent;
+        }
+        ul.friend_list li:hover{
+            background-color: lightgreen;
+            color: #1a1a1a;
+            cursor: pointer;
+            border: solid 1px green;
+        }
+        ul.friend_list .selected{
+            background-color: lightgreen;
+            color: #1a1a1a;
+            border: solid 1px green;
+        }
+        .form_container .btn_row{
+            position: absolute;
+            height: 40px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            text-align: center;
+        }
+        .form_container .btn_row input{
+            border-width: 0;
+            height: 100%;
+            width: 100%;
+            background-color: lightgray;
+            font-size: 24px;
+        }
+        .form_container .btn_row input:hover{
+            cursor: pointer;
+            background-color: lightgreen;
+        }
+        .close_btn{
+            position: absolute;
+            top:3px;
+            right:3px;
+            display: block;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        div.members_btn{
+            position: absolute;
+            display: block;
+            right:10px;
+            top: 10px;
+            background: url("/static/assets/img/icons@1x.png") -307px -253px;
+            height: 30px;
+            width: 30px;
+            cursor: pointer;
+        }
+        div.members_list_container {
+            position: absolute;
+            display: block;
+            width: 200px;
+            height: 372px;
+            top: 0;
+            right: -212px;
+            background-color: white;
+            padding-left: 10px;
+        }
+        div.members_list li:hover{
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+        div.members_action_bar{
+            position: absolute;
+            bottom: 0;
+        }
+        div.member_option_container{
+            height: 12px;
+            line-height: 12px;
+        }
+        div.member_option_container a{
+            margin-left: 5px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+        .white_board .managemsg{
+            color: gray;
+            text-align: center;
+        }
+        .invite_container{
+            position: absolute;
+            bottom: -40px;
+            background-color: white;
+            width: 190px;
+            padding-left: 10px;
+        }
+        .invite_container #invite_name{
+            width: 120px;
+        }
+        .toolbar .upload_btn{
+            display: inline-block;
+            height:30px;
+            width: 30px;
+            background: url("/static/assets/img/icons@1x.png") -120px -432px;
+        }
+        #files{
+            display: none !important;
+        }
+        .message img{
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main_container clearfix">
+        <div class="left_container clearfix fl">
+            <div class="my_info mt-10" uid="{{ uid }}">
+                <span>{{ nickname }}</span>&nbsp;&nbsp;&nbsp;
+                <a href="javascript:void(0)" onclick="logout()" class="logout_btn">退出</a>
+            </div>
+            <div class="action_bar mt-10 clearfix">
+                <div class="fl"><a href="javascript:void(0)" onclick="display_search('search_user', this)">添加好友</a></div>
+                <div class="fl"><a href="javascript:void(0)" onclick="display_search('search_group', this)">查找群</a></div>
+                <div class="fl"><a href="javascript:void(0)" onclick="new_chatroom_parameter()">创建群</a></div>
+            </div>
+            <div class="search_bar mt-10 clearfix hide">
+                <div class="fl">
+                    <input id="search_ele">
+                </div>
+                <div class="fl">
+                    <a href="javascript:void(0)" onclick="doSearch()" class="search_btn">搜</a>
+                </div>
+            </div>
+            <div class="search_result mt-10"></div>
+            <div class="create_bar mt-10 clearfix hide">
+                <div></div>
+            </div>
+            <div class="chat_list mt-10">
+            </div>
+        </div>
+        <div class="right_container clearfix fl">
+            <div class="chat_container hide">
+                <div class="title">
+                    <h2>标题</h2>
+                    <div class="members_btn" onclick="members_display_switch()">
+
+                    </div>
+                    <div class="members_list_container hide">
+                        <div class="members_list">
+                            <img src="/static/assets/img/loading.gif">
+                        </div>
+                        <div class="members_action_bar">
+                            <a class="member_invite_btn" href="javascript:void(0);" onclick="display_invitation()">邀请</a>
+                            <div class="invite_container hide">
+                                <div>
+                                    <input type="text" id="invite_name" placeholder="请输入用户昵称">
+                                    <input type="button" id="invite_btn" onclick="invite_user()" value="执行">
+                                </div>
+                                <div>
+                                    <span class="invite_result"></span>
+                                </div>
+                            </div>
+                            <a class="quit_chatroom" href="javascript:void(0);" onclick="quit_chatroom()">离开</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="white_board"></div>
+                <div class="message_editor_box">
+                    <div class="toolbar">
+                        <iframe id="upload_iframe" name="upload_iframe" class="hide"></iframe>
+                        <form id="upload_frm" action="/upload" method="post" enctype="multipart/form-data" target="upload_iframe">
+                            <a class="upload_btn" id="upload_btn" onclick="open_file_dialog()"></a>
+                            <input type="file" id="files" name="files" class="hide" multiple="multiple" onchange="upload_files()">
+                            <input type="hidden" value="" name="chatroom_id" id="chatroom_id">
+                        </form>
+                    </div>
+                    <div>
+                        <input placeholder="编写消息" id="textmsg" onkeydown="isEnter(this)">
+                        <a href="javascript:void(0)" onclick="sendmsg()" id="sendmsg_btn">发送</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="shelter hide">
+            <div class="dialog">
+                <div class="form_container">
+                    <div class="close_btn" onclick="close_new_frm()">×</div>
+                    <form id="new_chatroom_frm">
+                        <div class="head_row">
+                            <h1>创建群</h1>
+                        </div>
+                        <div class="title_row">
+                            <input name="new_title" id="new_title" placeholder="给群起个霸气的名字吧！"/>
+                        </div>
+                        <div class="friend_row">
+                            <h5>请选成员</h5>
+                            <ul class="friend_list">
+                            </ul>
+                        </div>
+                        <div class="btn_row">
+                            <input type="button" value="创建！" onclick="create_chatroom(2)">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/assets/js/jquery.2.1.1.min.js"></script>
+    <script>
+        // 用于记录当前的聊天对话ID
+        CURRENT_CHAT = null;
+
+        /* 判断回车 */
+        function isEnter(ele) {
+            if(event.keyCode==13){
+                $(ele).siblings('a').click();
+            }
+        }
+
+        /* 注销 */
+        function logout() {
+            $.get('/logout',function (response) {
+                if(response.status=='ok'){
+                    window.location.href=response.link;
+                }
+            });
+        }
+
+        /* 根据昵称查找用户 */
+        function search_user(name) {
+            $.get(
+                    "/user",
+                    {'nickname': name},
+                    function (response) {
+                        //console.log(response);
+                        $("div.search_result").children().remove();
+                        if(response.status=='ok'){
+                            // 查到了
+                            var span = document.createElement('span');
+                            span.innerText = '找到了' + response.data.nickname;
+                            var aBtn = document.createElement('a');
+                            //aBtn.setAttribute('uid',response.data.uid);
+                            aBtn.className = 'add_friend_btn';
+                            aBtn.innerText = '添加';
+                            aBtn.href = 'javascript:void(0)';
+                            aBtn.setAttribute('onclick', 'add_friend('+ response.data.uid +')');
+                            $("div.search_result").append(span).append(aBtn);
+                        }else{
+                            // 查找失败
+                            var span = document.createElement('span');
+                            span.innerText = response['error'];
+                            $("div.search_result").append(span);
+                        }
+                    }
+            );
+        }
+
+        /* 获取当前用户的所有朋友的列表 */
+        function get_friends() {
+            //
+            $.get('/friend',function (response) {
+                //console.log(response);
+                if(response.status=='ok'){
+                    $("ul.friend_list").children().remove();
+                    for(var key in response['friend_list']){
+                        var fid = response['friend_list'][key][0];
+                        var nickname = response['friend_list'][key][1];
+                        var li = document.createElement('li');
+                        li.className = 'friend_item';
+                        li.setAttribute('fid', fid);
+                        li.setAttribute('onclick', 'selectMe(this)');
+                        li.innerText = nickname;
+
+                        $("ul.friend_list").append(li);
+                    }
+                }
+            });
+        }
+
+        /* 创建群时，选择或不选成员 */
+        function selectMe(li) {
+            if($(li).hasClass('selected')){
+                $(li).removeClass('selected');
+            }else{
+                $(li).addClass('selected');
+            }
+        }
+
+        /* 根据群组ID来查找 */
+        function search_group(gid) {
+            $.get('/chatroom',{'chatroom_id':gid},function (response) {
+                console.log(response);
+                if(response.status=='ok'){
+                    var chatroom = response['chatrooms'][0];
+                    $("div.search_result").children().remove();
+                    // 查到了
+                    var span = document.createElement('span');
+                    span.innerText = '找到了' + chatroom['title'];
+                    var aBtn = document.createElement('a');
+                    aBtn.className = 'join_group_btn';
+                    aBtn.innerText = '申请加入';
+                    aBtn.href = 'javascript:void(0)';
+                    aBtn.setAttribute('onclick', 'join_group('+ gid.toString() +')');
+                    $("div.search_result").append(span).append(aBtn);
+                }
+            });
+        }
+
+        /* 展示搜索框 */
+        function display_search(f,ele) {
+            $("#search_ele").attr('callback', f);
+            $(".search_bar").removeClass('hide');
+            $('.action_bar a').removeClass('active');
+            $(ele).addClass('active');
+        }
+
+        /*
+            进行检索。
+            该检索根据标签的属性转化为函数名称，用eval进行调用
+        */
+        function doSearch() {
+            var func = $("#search_ele").attr('callback');
+            var ele_val = $("#search_ele").val();
+            var p = func+"('"+ele_val+"')";
+            eval(p);
+        }
+
+        /* 添加好友 */
+        function add_friend(new_friend_id) {
+            $.post("/friend", {'new_friend_id':new_friend_id},function (response) {
+                console.log(response);
+                if(response.status=='ok'){
+                    start_chat(new_friend_id);
+                }else {
+                    alert(response.error);
+                }
+            });
+        }
+
+        /* 好友开始第一次聊天 */
+        function start_chat(fid){
+            var members_id = JSON.stringify([fid]);
+            $.post(
+                "/chatroom",
+                {'members_id': members_id, 'chatroom_type': 1},   // chatroom_type 1:好友  2:群  3.临时
+                function (response) {
+                    //console.log(response);
+                    if(response.status=='ok'){
+                        var chatroom = response['chatroom'];
+                        create_left_btn(chatroom['rid'], chatroom['members'][0][1], 1, parseInt(fid));
+                    }
+                }
+            );
+        }
+
+        /* 创建左侧菜单的按钮 */
+        function create_left_btn(rid, title, room_type, friend_id) {
+            var outerdiv = document.createElement('div');
+            outerdiv.setAttribute('chat_id', rid);
+            if(friend_id!=0){
+                outerdiv.setAttribute('friend_chat', 'true');
+                outerdiv.setAttribute('friend_id', friend_id);
+            }
+            outerdiv.className = 'chat';
+            var a = document.createElement('a');
+            a.href = "javascript:void(0)";
+            a.setAttribute('onclick', 'open_chat_view('+ rid.toString() +')');
+            var innerdiv = document.createElement('div');
+            var img = document.createElement('img');
+            var span = document.createElement('span');
+            var notify_log = document.createElement('img');
+            notify_log.src="/static/assets/img/newmsg.png";
+            notify_log.className = 'notify_log hide';
+            span.innerText = title;
+            switch (room_type){
+                case 1:
+                    img.src = "/static/assets/img/chat.jpg";
+                    break;
+                case 2:
+                    img.src = "/static/assets/img/group.png";
+                    break;
+                case 3:
+                    img.src = "/static/assets/img/chat.jpg";
+                    break;
+            }
+
+            innerdiv.appendChild(img);
+            innerdiv.appendChild(span);
+            innerdiv.appendChild(notify_log);
+            a.appendChild(innerdiv);
+            outerdiv.appendChild(a);
+            $(".chat_list").prepend(outerdiv);
+        }
+
+        /* 将指定的会话置顶 */
+        function popup_chat(rid) {
+            var btn = $(".chat_list div[chat_id=" + rid + "]");
+            if(btn.size()>0) {
+                btn.siblings().removeClass('active');
+                btn.addClass('active');
+                $(".chat_list").prepend(btn);
+            }
+        }
+
+        /* 获取当前用户的聊天列表 */
+        function get_chatroom_list() {
+            // console.log('获取聊天列表');
+            $.get('/chatroom',function (response) {
+                //console.log(response);
+                if(response.status=='ok'){
+                    if(response.chatrooms.length>0){
+                        $(".chat_list").children().remove();
+                        for(var key in response.chatrooms){
+                            var title = "";
+                            var room_type = response.chatrooms[key]['room_type'];
+                            switch (room_type){
+                                case 1: // 好友
+                                    title = response.chatrooms[key]['members'][0][1];
+                                    create_left_btn(response.chatrooms[key]['rid'], title, response.chatrooms[key]['room_type'], response.chatrooms[key]['members'][0][0]);
+                                    break;
+                                case 2: // 群
+                                    title = response.chatrooms[key]['title'];
+                                    create_left_btn(response.chatrooms[key]['rid'], title, response.chatrooms[key]['room_type'], 0);
+                                    break;
+                                case 3: // 临时
+                                    title = response.chatrooms[key]['title'];
+                                    create_left_btn(response.chatrooms[key]['rid'], title, response.chatrooms[key]['room_type'], 0);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function open_chat_view(rid) {
+            rid = parseInt(rid);
+            if(rid==CURRENT_CHAT) return;  // 如果就是当前已经打开的会话，无需再继续下去
+            CURRENT_CHAT = rid;
+            popup_chat(rid);
+            $(".chat_container").removeClass('hide');
+            var leftBtn = $(".chat[chat_id="+rid.toString()+"]");
+            var chatroom_id = leftBtn.attr('chat_id');
+            var title = leftBtn.find('span').text() + ' ('+ chatroom_id.toString()+')';
+
+            $(".right_container .title h2").text(title);
+            $(".chat_container .message_editor_box input").focus();
+            clean_white_board();
+            getmsg(rid);
+            leftBtn.find('.notify_log').addClass('hide');
+            if(!$(".members_list_container").hasClass('hide')) show_members();
+        }
+
+        /* 发送消息 */
+        function sendmsg() {
+            console.log('ready to send msg');
+            var msg = $.trim($("#textmsg").val());
+            if(msg){
+                $.post(
+                    '/message',
+                    {
+                        'rid': CURRENT_CHAT,
+                        'content': msg
+                    },
+                    function (response) {
+                        //console.log(response);
+                        if(response.status=='ok'){
+                            $("#textmsg").val('');
+                        }else{
+                            alert(response.error);
+                        }
+                    }
+                );
+            }
+        }
+
+        /* 获取消息 */
+        function getmsg(chatroom_id, cursor) {
+            cursor = cursor||null;
+            $.get('/message', {'chatroom_id': chatroom_id, 'cursor':cursor}, function (response) {
+                //console.log(response);
+                if(response.status=='ok'){
+                    var messages = response['messages'];
+                    var current_user_id = $(".my_info").attr('uid');
+                    // $("div.white_board").children().remove();
+                    for(var key in messages){
+                        var outerDiv = document.createElement('div');
+                        outerDiv.setAttribute('uid', messages[key]['uid']);
+                        outerDiv.setAttribute('msg_type', messages[key]['type']);
+                        outerDiv.setAttribute('msg_id', messages[key]['message_id']);
+                        outerDiv.className = 'message clearfix';
+
+                        switch (messages[key]['type']){
+                            case 1:
+                                // 普通文字信息的处理
+                                var userDiv = document.createElement('div');
+                                var contentDiv = document.createElement('div');
+                                var quotationDiv = document.createElement('div');
+                                userDiv.innerText=messages[key]['nickname'];
+                                contentDiv.innerText=messages[key]['content'];
+                                quotationDiv.innerText = ':';
+                                if(messages[key]['uid']==current_user_id){
+                                    userDiv.className = 'fr';
+                                    quotationDiv.className = 'fr';
+                                    contentDiv.className = 'fr';
+                                }else {
+                                    userDiv.className = 'fl';
+                                    quotationDiv.className = 'fl';
+                                    contentDiv.className = 'fl';
+                                }
+                                outerDiv.appendChild(userDiv);
+                                outerDiv.appendChild(quotationDiv);
+                                outerDiv.appendChild(contentDiv);
+                                break;
+                            case 2:
+                                // 上传文件的处理
+                                userDiv = document.createElement('div');
+                                contentDiv = document.createElement('div');
+                                quotationDiv = document.createElement('div');
+                                userDiv.innerText=messages[key]['nickname'];
+                                var temp_list = messages[key]['content'].split('.');
+                                var file_ext = temp_list[temp_list.length - 1];
+                                var fA = document.createElement('a');
+                                if(['jpg','jpeg','bmp','png','gif'].indexOf(file_ext.toLowerCase())!=-1){
+                                    // 如果是图片
+                                    var fImg = document.createElement('img');
+                                    fImg.src = messages[key]['content'];
+                                    fA.appendChild(fImg);
+                                }else {
+                                    temp_list = messages[key]['content'].split('/');
+                                    var fname = temp_list[temp_list.length-1];
+                                    contentDiv.innerText = '我上传了文件:';
+                                    fA.innerText=fname;
+                                }
+                                fA.href=messages[key]['content'];
+                                fA.target = '_blank';
+                                contentDiv.appendChild(fA);
+                                quotationDiv.innerText = ':';
+                                if(messages[key]['uid']==current_user_id){
+                                    userDiv.className = 'fr';
+                                    quotationDiv.className = 'fr';
+                                    contentDiv.className = 'fr';
+                                }else {
+                                    userDiv.className = 'fl';
+                                    quotationDiv.className = 'fl';
+                                    contentDiv.className = 'fl';
+                                }
+                                outerDiv.appendChild(userDiv);
+                                outerDiv.appendChild(quotationDiv);
+                                outerDiv.appendChild(contentDiv);
+                                break;
+                            case 3:
+                                // 管理类信息的处理
+                                outerDiv.innerHTML = messages[key]['nickname'] + " " + messages[key]['content'] +
+                                    ' <a href="javascript:void(0);" onclick="member_join('+messages[key]['uid']+','+
+                                    chatroom_id.toString()+')">批准?</a>';
+                                outerDiv.className += ' managemsg';
+                                break;
+                        }
+                        $("div.white_board").append(outerDiv);
+                        scroll_white_board();
+                        $(".chat_list .active").attr('cursor', messages[key]['message_id']);
+                    }
+                }else if(response.status=='fail'){
+                    alert(response.error);
+                    close_chatroom(chatroom_id);
+                }
+            });
+        }
+
+        /* 关闭界面上的聊天室 */
+        function close_chatroom(chatroom_id) {
+            $('.chat_list .chat[chat_id='+chatroom_id.toString()+']').remove();
+            $('.chat_container').addClass('hide');
+            if(chatroom_id==CURRENT_CHAT){
+                CURRENT_CHAT=null;
+            }
+        }
+
+        /* 管理员让指定用户加入群 */
+        function member_join(new_member_id, chatroom_id) {
+            $.post(
+                '/group_member',
+                {
+                    'new_member_id': new_member_id,
+                    'chatroom_id': chatroom_id
+                },
+                function (response) {
+                    console.log(response);
+                    if(response.status=='ok'){
+                        show_members();
+                    }else if(response.status=='fail'){
+                        alert(response.error);
+                    }
+                }
+            );
+        }
+
+        /* sync获取新消息 */
+        function sync() {
+            $.get('/sync',function (response) {
+                //console.log(response);
+                if(response.status=='ok'){
+                    // 如果收到通知，则显示左侧菜单的新消息提示。如果正在打开的会话有新消息，则getmsg()一下
+                    for(var index in response['chatrooms_id']){
+                        var chatroom_id = response['chatrooms_id'][index];
+                        var ele = $(".chat[chat_id='"+chatroom_id+"']");
+                        if(ele.length>0){
+                            // 存在该对话
+                            if(ele.hasClass('active')){
+                                // 这个聊天室已经被打开
+                                var cursor = ele.attr('cursor');
+                                getmsg(chatroom_id, cursor);
+                            }else{
+                                // 存在，但没有打开的聊天会话
+                                ele.find(".notify_log").removeClass('hide');
+                            }
+                        }else{
+                            // 不存在该对话，有可能是新的会话
+                            $.get('/chatroom',{'chatroom_id':chatroom_id},function (response) {
+                                if(response.status=='ok'){
+                                    var chatroom = response['chatrooms'][0];
+                                    var chatroom_id =chatroom['chatroom_id'];
+                                    var room_type = parseInt(chatroom['room_type']);
+                                    var title;
+                                    var members;
+                                    var current_user_id = parseInt($(".my_info").attr('uid'));
+
+                                    // 判断房间类型，决定标题
+                                    switch (room_type){
+                                        case 1:
+                                            $.get('/chatroom_member',{'chatroom_id':chatroom_id}, function (response) {
+                                            if(response.status=='ok'){
+                                                members = response['members'];
+                                                // 好友一对一会话
+                                                var friend_id = 0;
+                                                for(var i in members){
+                                                    if(members[i]['uid']!=current_user_id){
+                                                        title = members[i]['nickname'];
+                                                        friend_id = parseInt(members[i]['uid']);
+                                                        break;
+                                                    }
+                                                }
+                                                create_left_btn(chatroom_id, title, 1, friend_id);
+                                                $(".chat[chat_id="+chatroom_id.toString()+"]").find(".notify_log").removeClass('hide');
+                                            }
+                                        });
+                                            break;
+                                        case 2:
+                                            // 群会话
+                                            title = chatroom['title'];
+                                            create_left_btn(chatroom_id, title, 2, 0);
+                                            break;
+                                        case 3:
+                                            //临时会话
+                                            title = '临时会话';
+                                            create_left_btn(chatroom_id, title, 3, 0);
+                                            break;
+                                    }
+                                    $(".chat[chat_id="+chatroom_id.toString()+"]").find(".notify_log").removeClass('hide');
+                                }
+                            });
+                        }
+
+                    }
+                }else if(response.status=='needlogin'){
+                    alert("登录已失效");
+                    window.location.href=response.link;
+                    return;
+                }
+                scroll_white_board();
+                // 完成后，重新sync
+                sync();
+            });
+        }
+
+        /* 白板滚动到最底 */
+        function scroll_white_board() {
+            var white_board = $('.white_board');
+            white_board.scrollTop(white_board[0].scrollHeight );
+        }
+
+        /* 擦白板 */
+        function clean_white_board() {
+            $('.white_board').children().remove();
+        }
+
+        /* 让用户填写新群的成员和标题 */
+        function new_chatroom_parameter() {
+            // 展示遮罩层，并显示表单
+            $(".shelter").removeClass('hide');
+            $(".dialog").removeClass('hide');
+            // 读取好友列表
+            get_friends();
+        }
+
+        /* 隐藏创建群的表单 */
+        function close_new_frm() {
+            $(".shelter").addClass('hide');
+            $(".dialog").addClass('hide');
+        }
+
+        /* 创建聊天室 */
+        function create_chatroom(room_type) {
+            var new_title;
+            if(room_type==2){
+                new_title = $.trim($('#new_title').val());
+                if(new_title.length==0){
+                    alert("标题不能为空");
+                    $("input#new_title").focus();
+                    return false;
+                }
+            }else if(room_type==3){
+                new_title = '临时对话';
+            }
+
+            var members_id = [];
+            $(".friend_list .selected").each(function () {
+                var fid = this.getAttribute('fid');
+                members_id.push(fid);
+            });
+            console.log(members_id);
+            if(members_id.length<2){
+                alert("群组至少要有2个好友。");
+                return false;
+            }else{
+                // 向服务器发起创建请求
+                var members_id_json = JSON.stringify(members_id);
+                $.post('/chatroom',{'members_id': members_id_json, 'chatroom_type':room_type, 'title':new_title}, function (response) {
+                    console.log(response);
+                    if(response.status=='ok'){
+                        // 创建成功
+                        var chatroom_id = response['chatroom']['rid'];
+                        create_left_btn(chatroom_id, new_title, 2, 0);
+                        open_chat_view(chatroom_id);
+                        // 关闭表单框
+                        close_new_frm();
+                    }
+                });
+            }
+        }
+
+        /* 成员列表显示开关 */
+        function members_display_switch() {
+            var members_list_container = $('div.members_list_container');
+            if(members_list_container.hasClass('hide')){
+                members_list_container.removeClass('hide');  // 显示成员列表
+                show_members();
+            }else{
+                members_list_container.addClass('hide');
+            }
+        }
+
+        /* 显示当前会话的成员列表 */
+        function show_members() {
+            if(!CURRENT_CHAT){
+                return;
+            }
+            var members_list = $('div.members_list');
+            var members_list_container = $('div.members_list_container');
+            var chatroom_id = $(".chat_list .active").attr('chat_id');
+            //if(members_list.hasClass('hide')){
+                members_list_container.removeClass('hide');  // 显示成员列表
+                $.get('/chatroom_member',{'chatroom_id': chatroom_id},function (response) {
+                    console.log(response);
+                    if(response.status=='ok'){
+                        var members = response.members;
+                        members_list.children().remove();
+                        var ul = document.createElement('ul');
+                        for(var i in members){
+                            var a = document.createElement('a');
+                            var li = document.createElement('li');
+                            var img = document.createElement('img');
+                            var span = document.createElement('span');
+
+                            // 属于每个成员的菜单
+                            var div = document.createElement('div');
+                            div.className = 'member_option_container hide';
+                            var add_friend_a = document.createElement('a');
+                            add_friend_a.innerText = '加好友';
+                            add_friend_a.href='javascript:void(0);';
+                            add_friend_a.setAttribute('onclick','add_friend('+members[i]['uid'].toString()+')');
+                            var mute_a = document.createElement('a');
+                            mute_a.href='javascript:void(0);';
+                            var leave_a = document.createElement('a');
+                            leave_a.innerText = '移除';
+                            leave_a.href='javascript:void(0);';
+                            leave_a.setAttribute('onclick','leave_chatroom('+chatroom_id.toString()+','+members[i]['uid'].toString()+')');
+
+                            div.appendChild(add_friend_a);
+                            div.appendChild(mute_a);
+                            div.appendChild(leave_a);
+
+                            if(members[i]['speakable']){
+                                mute_a.innerText = '禁言';
+                                mute_a.setAttribute('onclick', 'mute('+chatroom_id.toString()+','+members[i]['uid'].toString()+',true, this)');
+                            }else{
+                                mute_a.innerText = '解禁';
+                                mute_a.setAttribute('onclick', 'mute('+chatroom_id.toString()+','+members[i]['uid'].toString()+',false, this)');
+                            }
+
+                            var up2manager_a = document.createElement('a');
+                            up2manager_a.href='javascript:void(0);';
+
+                            if(members[i]['isOwner']){
+                                // 主人
+                                // img=....
+                                span.innerText = "(主人) " + members[i]['nickname'];
+                                li.className+=' owner manager';
+                            }else if(members[i]['isManager']){
+                                // 管理员
+                                // img=...
+                                span.innerText = "(管理员) " + members[i]['nickname'];
+                                li.className+=' manager';
+                                up2manager_a.innerText='降级';
+                                up2manager_a.href='javascript:void(0);';
+                                up2manager_a.setAttribute('onclick', 'downgrade_to_member(this)');
+                            }else{
+                                // 普通成员
+                                span.innerText = "(成员) " + members[i]['nickname'];
+                                li.className+=' member';
+                                up2manager_a.innerText='设为管理员';
+                                up2manager_a.href='javascript:void(0);';
+                                up2manager_a.setAttribute('onclick', 'upgrade_to_manager(this)');
+                            }
+                            div.appendChild(up2manager_a);
+
+                            a.href = 'javascript:void(0)';
+                            a.setAttribute('onclick', 'create_chat_from_group('+members[i]['uid'].toString()+')');
+                            a.appendChild(img);
+                            a.appendChild(span);
+                            li.setAttribute('uid',members[i]['uid']);
+                            li.appendChild(a);
+                            li.appendChild(div);
+                            li.setAttribute('onmouseover','display_member_option(this)');
+                            ul.appendChild(li);
+                        }
+                        members_list.append(ul);
+                    }
+                });
+        }
+        
+        function leave_chatroom(chatroom_id, member_id) {
+            $.ajax({
+                url:'/chatroom_member',
+                type:'DELETE',
+                data:{'chatroom_id':chatroom_id, 'member_id':member_id},
+                success:function (response) {
+                    console.log(response);
+                    if(response.status=='ok'){
+                        show_members();
+                    }else if(response.status=='fail'){
+                        alert(response.error);
+                    }
+                }
+            });
+        }
+
+        /* 当前用户主动离开当前聊天室 */
+        function quit_chatroom() {
+            var chatroom_id = CURRENT_CHAT;
+            var current_user_id = $(".my_info").attr('uid');
+            if(confirm('要离开当前的聊天室吗？')){
+                leave_chatroom(chatroom_id, current_user_id);
+                close_chatroom(chatroom_id);
+            }
+        }
+
+        /* 展示群成员邀请框 */
+        function display_invitation() {
+            $(".invite_container").removeClass('hide');
+        }
+
+        /* 升级为管理员 */
+        function upgrade_to_manager(ele) {
+            var chatroom_id = CURRENT_CHAT;
+            var member_id = $(ele).parent().parent().attr('uid');
+            $.ajax({
+                url: '/chatroom_member',
+                data: {'action':'upgrade2manager','member_id': member_id, 'chatroom_id':chatroom_id},
+                type: 'PUT',
+                success: function (response) {
+                    console.log(response);
+                    if(response.status=='ok'){
+                        show_members();
+                    }else if(response.status=='fail'){
+                        alert(response.error);
+                    }
+                }
+            });
+        }
+        
+        /* 将管理员降级为普通成员 */
+        function downgrade_to_member(ele) {
+            var chatroom_id = CURRENT_CHAT;
+            var member_id = $(ele).parent().parent().attr('uid');
+            $.ajax({
+                url: '/chatroom_member',
+                data: {'action':'manager_down','member_id': member_id, 'chatroom_id':chatroom_id},
+                type: 'PUT',
+                success: function (response) {
+                    console.log(response);
+                    if(response.status=='ok'){
+                        show_members();
+                    }else if(response.status=='fail'){
+                        alert(response.error);
+                    }
+                }
+            });
+        }
+
+        /* 展示成员的选项 */
+        function display_member_option(ele) {
+            $("div.members_list").find(".member_option_container").addClass('hide');
+            $(ele).find(".member_option_container").removeClass('hide');
+        }
+
+        /* 禁言功能 */
+        function mute(chatroom_id, member_id, flag, mute_btn) {
+            $.post(
+                    '/mute',
+                    {
+                        'chatroom_id': chatroom_id,
+                        'member_id': member_id,
+                        'flag': flag
+                    },
+                    function (response) {
+                        console.log(response);
+                        if(response.status=='ok'){
+                            // 操作成功
+                            if(flag){
+                                $(mute_btn).text('解禁');
+                                $(mute_btn).attr('onclick', 'mute('+chatroom_id.toString()+','+member_id.toString()+',false,this)');
+                            }else{
+                                $(mute_btn).text('禁言');
+                                $(mute_btn).attr('onclick', 'mute('+chatroom_id.toString()+','+member_id.toString()+',true,this)');
+                            }
+                        }else if(response.status=='fail'){
+                            // 操作失败
+                            alert(response.error);
+                        }
+                    }
+            );
+        }
+
+        /* 申请加入群 */
+        function join_group(gid) {
+            $.post('/chatroom_member',{'chatroom_id': gid},function (response) {
+                console.log(response);
+                if(response.status=='ok'){
+                    alert("申请已发送，等待管理员审批");
+                }
+            });
+        }
+
+        /* 从群里发起一对一聊天 */
+        function create_chat_from_group(member_id) {
+            // 先检查是否已存在聊天会话
+            var isFriend = $(".chat[friend_chat='true'][friend_id="+member_id.toString()+"]").length > 0;
+            if(isFriend){
+                var chatroom_id = parseInt($(".chat[friend_chat='true'][friend_id="+member_id.toString()+"]").attr('chat_id'));
+                open_chat_view(chatroom_id);
+                return true;
+            }else{
+                $.get('/temp_chat', {'member_id': member_id}, function (response) {
+                    console.log(response);
+                    if(response.status=='ok'){  // 已存在临时聊天对话
+                        var chat_id = response['chatroom_id'];
+                        create_left_btn(chat_id, '临时会话', 3, 0);
+                        open_chat_view(chat_id);
+                    }else if(response.status=='fail'){
+                        alert(response.error);
+                    }
+                });
+            }
+        }
+
+        /* 邀请用户加入当前聊天室 */
+        function invite_user() {
+            var new_member_nickname = $("#invite_name").val();
+            $.ajax({
+                url:'/chatroom_member',
+                data:{'new_member_nickname':new_member_nickname,'chatroom_id':CURRENT_CHAT,'action': 'invite'},
+                type: 'PUT',
+                success:function (response) {
+                    if(response.status=='ok'){
+                        alert("邀请成功");
+                        show_members();
+                    }else if(response.status=='fail'){
+                        $("span.invite_result").text(response.error);
+                    }
+                }
+            });
+        }
+
+        /* 上传文件 */
+        function upload_files() {
+            var upload_iframe = document.getElementById('upload_iframe');
+            upload_iframe.onload = upload_callback;
+            var upload_frm = document.getElementById('upload_frm');
+            if(CURRENT_CHAT){
+                $(upload_frm).find("#chatroom_id").val(CURRENT_CHAT);
+            }
+            upload_frm.submit()
+        }
+        function open_file_dialog() {
+            $("#files").click();
+        }
+        function upload_callback() {
+            var t = $("#upload_iframe").contents().find('body').text();
+            console.log(t);
+            var response = JSON.parse(t);
+            if(response.status=='fail'){
+                alert(response.error);
+            }
+        }
+
+
+        $(function () {
+            get_chatroom_list();
+            sync();
+        });
+    </script>
+</body>
+</html>

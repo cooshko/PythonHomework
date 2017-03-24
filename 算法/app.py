@@ -35,6 +35,8 @@ def mission(func, l):
 
 if __name__ == '__main__':
     test_times = 3000
+    print("准备执行随机数组排序测试，数组长度为%d" % test_times)
+    print()
     ran_list = list([random.randrange(0-test_times, test_times) for i in range(test_times)])    # 生成待测试的随机数组
 
     t_list = []  # 存放线程的数组

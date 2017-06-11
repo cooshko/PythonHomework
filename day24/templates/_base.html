@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>衣柜新热榜</title>
+    <link rel="stylesheet" href="{% static "css/base.css" %}">
+    <link rel="stylesheet" href="{% static "css/wangEditor.min.css" %}">
+    <link rel="icon" href="{% static "img/favourite.png" %}">
+    <style>
+        div.uploaded_preview{
+            position: absolute;
+            left:240px;
+            top:300px;
+        }
+        div.uploaded_preview img{
+            max-width:100px;
+            max-height:100px;
+        }
+        div.publish_btn_box{
+            position: absolute;
+            left:100px;
+            bottom:40px;
+        }
+        div.publish_btn_box a{
+            display: block;
+            width: 600px;
+            height:50px;
+            line-height: 50px;
+            text-align: center;
+            background-color: #2459a2;
+            color: white;
+            font-size: 30px;
+            border: 1px solid lightgray;
+            border-radius: 10px;
+        }
+        div.publish_btn_box a:hover{
+            background-color: #8eb031;
+        }
+        #editor-trigger {
+            height: 150px;
+            /*max-height: 500px;*/
+        }
+        .container {
+            width: 500px;
+            /*margin: 0 auto;*/
+            position: relative;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="w">
+            <div class="logo fl">
+                <a href="/app01/">衣柜新热榜</a>
+            </div>
+            <div class="nav fl">
+                <a href="javascript:void(0);" cid="0" class="current" onclick="view_posts(this,0,1)">全部</a>
+                {% for c in visible_catalog %}
+{#                    <a href="/app01/?catalog_id={{ c.id }}">{{ c.name }}</a>#}
+                    <a href="javascript:void(0);" cid="{{ c.id }}" onclick="view_posts(this,{{ c.id }},1)">{{ c.name }}</a>
+                {% endfor %}
+            </div>
+            <div class="login_or_register fr">
+                <a href="javascript:void(0);" onclick="show_login_reg_frm()">登录 / 注册</a>
+            </div>
+            <div class="user_info fr">
+                <em id="userProArr" class="fl"></em>
+                <img class="head_pic" src="/static/img/head/mxcp_320x320.jpg">
+                <span id="display_name"  {% if is_login %}is_login{% endif %}>{{ user.display_name }}</span>
+                <div class="user_menu hide">
+                    <a>设置</a>
+                    <a onclick="logout()">退出</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pg-content">
+        <div class="w">
+            <div>
+                <a href="javascript:void(0);" class="publish_btn" onclick="show_publish_frm(true)">发 布 +</a>
+            </div>
+            <div class="clearfix">
+            {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="w">
+            衣柜新热榜，摆明是山寨抽屉。SO WHAT？
+        </div>
+    </div>
+    <div class="shelter hide">
+        <div class="login_reg_frm hide">
+            <div class="close_login_reg_frm" onclick="close_login_reg_frm()">×</div>
+            <div class="login_frm fl">
+                <h1>登录</h1>
+                <table>
+                    <tr>
+                        <th>用户名</th><td><input type="text" name="login_name" class="login_name"></td>
+                    </tr>
+                    <tr>
+                        <th>密码</th><td><input type="password" name="password" class="password"></td>
+                    </tr>
+                </table>
+                <a href="javascript:void(0);" onclick="login(this)">登录</a>
+                <div class="login_result"></div>
+            </div>
+            <div class="reg_frm fl">
+                <h1>注册</h1>
+                <form method="post" id="register_frm">
+                    <table>
+                        <tr>
+                            <th>用户名</th>
+                            <td><input type="text" id="login_name" name="login_name" onblur="check_exist(this)"></td>
+                            <td class="tips"></td>
+                        </tr>
+                        <tr>
+                            <th>邮箱</th>
+                            <td><input type="email" id="email" name="email" onblur="check_exist(this)"></td>
+                            <td class="tips"></td>
+                        </tr>
+                        <tr>
+                            <th>密码</th>
+                            <td><input id="password" type="password" name="password" autocomplete="off" minlength="3"></td>
+                            <td class="tips"></td>
+                        </tr>
+                        <tr>
+                            <th>确认密码</th>
+                            <td><input id="password2" type="password" name="password2" autocomplete="off" minlength="3" onblur="confirm_password()"></td>
+                            <td class="tips"></td>
+                        </tr>
+                        <tr>
+                            <th>验证码</th>
+                            <td>
+                                <input type="text" id="verify_code" name="verify_code" class="verify_code" maxlength="4" onclick="create_verify_code_img()">
+                            </td>
+                            <td class="tips"></td>
+                        </tr>
+                    </table>
+                    <div style="position: relative;">
+                        <a href="javascript:void(0);" onclick="register(this)">注册</a>
+                        <div class="reg_shelter hide"></div>
+                    </div>
+
+                    <br>
+                    <div class="register_result"></div>
+                </form>
+            </div>
+        </div>
+        <div class="publish_frm hide">
+            <div class="close_publish_frm" onclick="show_publish_frm(false)">×</div>
+            <div class="publish_text">
+                <label>
+                    <textarea class="publish_text" placeholder="说点什么吧" id="publish_text"></textarea>
+                </label>
+            </div>
+            <div class="publish_catalog">
+                {% for c in enable_catalog %}
+                    <a href="javascript:void(0);" cid="{{ c.id }}" onclick="publish_radio_btn(this)">{{ c.name }}</a>
+                {% endfor %}
+                <script>
+                    function publish_radio_btn(ele) {
+                        $(ele).siblings().removeClass("current");
+                        $(ele).addClass("current");
+                    }
+                </script>
+            </div>
+            <div class="upload_div">
+                <iframe id="if" name="if" style="display: none;"></iframe>
+                <form id="fo" method="post" enctype="multipart/form-data" action="/app01/upload/" target="if">
+                    <input type="file" accept="image/jpeg,image/png" id="publish_file" name="publish_file" class="publish_file" style="display: none;" onchange="upload_img()">
+                </form>
+                <a href="javascript:void(0);" class="upload_btn" onclick="document.getElementById('publish_file').click()">上传图片</a>
+
+                <script>
+
+                </script>
+            </div>
+            <div class="uploaded_preview"></div>
+            <div class="publish_btn_box">
+                <a href="javascript:void(0);" onclick="publish()">发 布</a>
+            </div>
+        </div>
+    </div>
+    <script src="{% static "js/jquery-1.12.4.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/wangEditor.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/rte.js" %}"></script>
+    <script type="text/javascript" src="{% static "js/base.js" %}"></script>
+    <script>
+
+
+
+
+
+
+
+
+        /* 初始化函数 */
+        $(function () {
+            /* 处理是否登录 */
+            if($("#display_name")[0].hasAttribute("is_login")){
+                // 已经登录
+                $(".login_or_register").addClass("hide");
+                $(".user_info").removeClass("hide");
+            }else {
+                // 未登录
+                $(".login_or_register").removeClass("hide");
+                $(".user_info").addClass("hide");
+            }
+
+            /* 用户菜单是否显示 */
+            $("div.user_info").hover(function () {
+                show_user_menu(true);
+            },function () {
+                show_user_menu(false);
+            });
+
+            /* 显示首页 */
+            view_posts($(".nav:first-child")[0],0,1);
+
+            /* 显示在线用户 */
+            get_online_users()
+            setInterval(get_online_users, 10000);
+        });
+
+    </script>
+</body>
+</html>

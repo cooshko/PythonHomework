@@ -1,0 +1,26 @@
+<div class="pagination">
+    <span class="step-links">
+        {% if page.has_previous %}
+        <a href="?page={{ page.previous_page_number }}" onclick="return open_page(this)"> &lt;&lt;</a>
+        {% endif %}
+        <span>
+            Page {{ page.number }} of {{ page.paginator.num_pages }}.
+        </span>
+        {% if page.has_next %}
+        <a href="?page={{ page.next_page_number }}" onclick="return open_page(this)"> &gt;&gt;</a>
+        {% endif %}
+    </span>
+    <script>
+        function open_page(a) {
+            var url = "/webapp/staff/manage_student/" + $(a).attr("href");
+            $.get({
+                url: url,
+                dataType: "html",
+                success: function (response) {
+                    $("div.main").html(response);
+                }
+            });
+            return false;
+        }
+    </script>
+</div>

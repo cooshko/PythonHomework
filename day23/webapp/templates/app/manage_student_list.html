@@ -1,0 +1,28 @@
+<h1 class="page-header">学员信息</h1>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+              <th>姓名</th>
+              <th>状态</th>
+              <th>性别</th>
+              <th>邮箱</th>
+              <th>电话</th>
+              <th>属区</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+              <td><a href="/webapp/staff/manage_student/{{ student.id }}/" target="_blank">{{ student.name }}</a></td>
+              <td>{{ student.status }}</td>
+              <td>{{ student.gender }}</td>
+              <td>{{ student.email }}</td>
+              <td>{{ student.phone }}</td>
+              <td>{{ student.area.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% include "app/manage-student-paginator.html" with page=students %}

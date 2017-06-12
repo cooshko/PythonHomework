@@ -1,0 +1,7 @@
+div.follow_up_box tbody tr:hover{
+    cursor: pointer;
+}
+td, th{
+    padding: 2px 5px;
+    min-width: 200px;
+}

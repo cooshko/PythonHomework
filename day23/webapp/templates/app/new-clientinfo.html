@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>添加客户资料</title>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            {{ new_form.as_table }}
+        </table>
+        <input type="submit" value="提交">
+    </form>
+</body>
+</html>

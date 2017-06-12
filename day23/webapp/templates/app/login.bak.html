@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}
+登录
+{% endblock %}
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            {{ loginForm.as_table }}
+        </table>
+        <input type="submit" value="登录">
+    </form>
+{% endblock %}
